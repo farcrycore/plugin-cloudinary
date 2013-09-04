@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<webtop>
+	<section id="admin">
+		<subsection id="coapi">
+			<menu id="diagnostics">
+				<menuitem id="cloudinarymigrator" sequence="100" label="Cloudinary Migrator" link="/admin/customadmin.cfm?plugin=cloudinary&amp;module=utilities/cloudinarymigrator.cfm" />
+			</menu>
+		</subsection>
+	</section>
+</webtop>
