@@ -164,7 +164,7 @@
 <cfoutput>
 	<h1><admin:resource key="webtop.utilities.cdnmigrator@title">Cloudinary Migration Tool</admin:resource></h1>
 	<admin:resource key="webtop.utilities.coapisqllog.blurb@html">
-		<p>This tool makes it easy to migrate existing images to Cloudinary hosting.</p>
+		<p>This tool makes it easy to migrate existing images to Cloudinary hosting. #qWrong.recordcount# are not on Cloudinary now.</p>
 	</admin:resource>
 </cfoutput>
 
@@ -173,7 +173,6 @@
 		<cfif qWrong.recordcount>
 			<ft:button value="Copy Files" onclick="copyFiles('toggle');return false;" />
 		</cfif>
-		<ft:button value="Compare" />
 	</ft:buttonPanel>
 	
 	<cfif qWrong.recordcount>
