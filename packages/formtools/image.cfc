@@ -1,5 +1,8 @@
 <cfcomponent extends="farcry.core.packages.formtools.image" output="false" persistent="false">
-
+	
+	<cfproperty name="ftShowMetadata" type="boolean" default="false" hint="If this is set to false, the file size and dimensions of the current image are not displayed to the user" />
+	
+	
 	<cffunction name="handleFilePost" access="public" output="false" returntype="struct" hint="Handles image post and returns standard formtool result struct">
 		<cfargument name="objectid" type="uuid" required="true" hint="The objectid of the edited object" />
 		<cfargument name="existingfile" type="string" required="true" hint="Current value of property" />
@@ -24,6 +27,7 @@
 			<cfset arguments.destination = "/#arguments.destination#" />
 		</cfif>
 		
+		<!--- source=xxx => original file for this image; _source=xxx => temporary variable used for dependant cuts --->
 		<cfif refindnocase("//res.cloudinary.com/.*\?source=",arguments.existingfile)>
 			<cfset sourceFile = getCloudinarySource(arguments.existingfile) />
 		<cfelseif len(arguments.existingfile) and not refindnocase("//res.cloudinary.com/",arguments.existingfile) and application.fc.lib.cdn.ioFileExists(location="images",file=arguments.existingfile)>
@@ -110,6 +114,7 @@
 			<cfset arguments.destination = "/#arguments.destination#" />
 		</cfif>
 		
+		<!--- source=xxx => original file for this image; _source=xxx => temporary variable used for dependant cuts --->
 		<cfif refindnocase("//res.cloudinary.com/.*\?source=",arguments.existingfile)>
 			<cfset sourceFile = getCloudinarySource(arguments.existingfile) />
 		<cfelseif len(arguments.existingfile) and not refindnocase("//res.cloudinary.com/",arguments.existingfile) and application.fc.lib.cdn.ioFileExists(location="images",file=arguments.existingfile)>
@@ -226,7 +231,12 @@
 			<cfthrow message="Source has not been migrated to Cloudinary" />
 		</cfif>
 		
-		<cfreturn passed(rereplace(sourcefilename,"\?source=[^&]+","")) />
+		<!--- source=xxx => original file for this image; _source=xxx => temporary variable used for dependant cuts --->
+		<cfif refind("\?(source|_source)=",sourcefilename)>
+			<cfreturn passed(rereplace(sourcefilename,"\?_?source=[^&]+","") & "?_source=" & getCloudinarySource(sourcefilename)) />
+		<cfelse>
+			<cfreturn passed(sourcefilename) />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="GenerateImage" access="public" output="false" returntype="struct">
@@ -265,8 +275,6 @@
 			<cfset stResult.message = "Cloudinary source images must be resized during upload" />
 			<cfreturn stResult />
 		</cfif>
-		
-		<cfset stImage = getCloudinaryInfo(arguments.source) />
 		
 		<cfswitch expression="#arguments.ResizeMethod#">
 		
@@ -385,10 +393,10 @@
 		
 		<!--- Modify extension to convert image format --->
 		<cfif not len(arguments.convertImageToFormat)>
-			<cfset arguments.convertImageToFormat = listlast(arguments.source,".") />
+			<cfset arguments.convertImageToFormat = listlast(listfirst(arguments.source,"?"),".") />
 		</cfif>
 		
-		<cfset stResult.filename = "//res.cloudinary.com/#application.config.cloudinary.cloudName#/image/upload/#format#/#stImage.public_id#.#arguments.convertImageToFormat#" />
+		<cfset stResult.filename = "//res.cloudinary.com/#application.config.cloudinary.cloudName#/image/upload/#format#/#getCloudinaryID(arguments.source)#.#arguments.convertImageToFormat#" />
 		
 		<cfreturn stResult />
 	</cffunction>
@@ -493,8 +501,8 @@
 	<cffunction name="getCloudinarySource" access="public" output="false" returntype="string" hint="Returns the source embedded in a Cloudinary image path">
 		<cfargument name="file" type="string" required="true" />
 		
-		<cfif refindnocase("\?source=",arguments.file)>
-			<cfreturn urldecode(rereplacenocase(arguments.file,".*\?source=([^&]+).*","\1")) />
+		<cfif refindnocase("\?_?source=",arguments.file)>
+			<cfreturn urldecode(rereplacenocase(arguments.file,".*\?_?source=([^&]+).*","\1")) />
 		<cfelse>
 			<cfreturn "" />
 		</cfif>
@@ -545,6 +553,7 @@
 		</cfif>
 		
 		<cfif (not structkeyexists(arguments.stObject,"versionID") or not len(arguments.stObject.versionID))>
+			<!--- source=xxx => original file for this image; _source=xxx => temporary variable used for dependant cuts --->
 			<cfif refindnocase("//res.cloudinary.com/.*\?source=",arguments.stObject[arguments.stMetadata.name])>
 				<cfset deleteFromCloudinary(file=arguments.stObject[arguments.stMetadata.name]) />
 				
@@ -578,13 +587,29 @@
 			<cfreturn stResult />
 		</cfif>
 		
-		<cfif refindnocase("//res.cloudinary.com/",arguments.stObject[arguments.stMetadata.name])>
-			<cfset stResult.path = rereplace(arguments.stObject[arguments.stMetadata.name],"\?source=[^&]+","") />
+		<cfif arguments.admin and refindnocase("\?_?source=",arguments.stObject[arguments.stMetadata.name])>
+			<cfset stResult = application.fc.lib.cdn.ioGetFileLocation(location="images",file=getCloudinarySource(arguments.stObject[arguments.stMetadata.name])) />
+		<cfelseif refindnocase("//res.cloudinary.com/",arguments.stObject[arguments.stMetadata.name])>
+			<cfset stResult.path = rereplace(arguments.stObject[arguments.stMetadata.name],"\?_?source=[^&]+","") />
 		<cfelse>
 			<cfset stResult = application.fc.lib.cdn.ioGetFileLocation(location="images",file=arguments.stObject[arguments.stMetadata.name],admin=arguments.admin) />
 		</cfif>
 		
 		<cfreturn stResult />
+	</cffunction>
+	
+	<cffunction name="getFileExists" access="public" output="false" returntype="boolean" hint="Returns true if file is non-empty and exists">
+		<cfargument name="file" type="string" required="true" />
+		
+		<cfif refindnocase("//res.cloudinary.com/.*\?_?source=",arguments.file)>
+			<cfreturn application.fc.lib.cdn.ioFileExists(location='images',file=getCloudinarySource(arguments.file)) />
+		<cfelseif refindnocase("//res.cloudinary.com/",arguments.file)>
+			<cfreturn true />
+		<cfelseif len(arguments.file)>
+			<cfreturn application.fc.lib.cdn.ioFileExists(location="images",file=arguments.file) />
+		<cfelse>
+			<cfreturn false />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="getImageInfo" access="public" output="false" returntype="struct" hint="Returns information about image">
@@ -595,18 +620,23 @@
 		<cfset var stImage = structnew() />
 		<cfset var stResult = structnew() />
 		
-		<cfif refindnocase("//res.cloudinary.com/.*\?source=",arguments.file)>
+		<cfif refindnocase("//res.cloudinary.com/.*\?_?source=",arguments.file) and application.fc.lib.cdn.ioFileExists(location='images',file=getCloudinarySource(arguments.file))>
 			
-			<cfset stImage = getCloudinaryInfo(arguments.file) />
-		
+			<cfimage action="info" source="#application.fc.lib.cdn.ioReadFile(location='images',file=getCloudinarySource(arguments.file),datatype='image')#" structName="stImage" />
+			
 			<cfset stResult["width"] = stImage.width />
 			<cfset stResult["height"] = stImage.height />
-			<cfset stResult["size"] = stImage.bytes />
-			<cfset stResult["path"] = rereplacenocase(arguments.file,"\?source=[^&]+","") />
+			<cfset stResult["size"] = application.fc.lib.cdn.ioGetFileSize(location="images",file=getCloudinarySource(arguments.file)) />
+			
+			<cfif arguments.admin>
+				<cfset stResult["path"] = application.fc.lib.cdn.ioGetFileLocation(location="images",file=getCloudinarySource(arguments.stObject[arguments.stMetadata.name])).path />
+			<cfelse>
+				<cfset stResult["path"] = rereplacenocase(arguments.file,"\?_?source=[^&]+","") />
+			</cfif>
 			
 		<cfelseif refindnocase("//res.cloudinary.com/",arguments.file)>
 			
-			<cfhttp url="http:#rereplacenocase(arguments.file,'\?source=[^&]+','')#" getasbinary="yes" />
+			<cfhttp url="http:#rereplacenocase(arguments.file,'\?_?source=[^&]+','')#" getasbinary="yes" />
 			<cfimage action="info" source="#cfhttp.filecontent#" structName="stImage" />
 			
 			<cfset stResult["width"] = stImage.width />
@@ -647,9 +677,14 @@
 			<cfreturn "" />
 		</cfif>
 		
-		<cfif refindnocase("//res.cloudinary.com/",currentfilename)>
+		<cfif refindnocase("//res.cloudinary.com/.*\?source=",currentfilename)>
 			
-			<cfreturn rereplacenocase(currentfilename,"\?source=[^&]+","") />
+			<cfset newfilename = application.fc.lib.cdn.ioCopyFile(source_pathlocation="images",source_file=getCloudinarySource(currentfilename),dest_location="images",nameconflict="makeunique",uniqueamong="images") />
+			<cfreturn rereplacenocase(currentfilename,"\?source=[^&]+","") & "?source=#urlencodedformat(newfilename)#" />
+			
+		<cfelseif refindnocase("//res.cloudinary.com/",currentfilename)>
+			
+			<cfreturn rereplacenocase(currentfilename,"\?_?source=[^&]+","") />
 		
 		<cfelse>
 		
