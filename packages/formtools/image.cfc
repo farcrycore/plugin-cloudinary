@@ -16,6 +16,7 @@
 		<cfset var stResult = passed(arguments.existingfile) />
 		<cfset var stFile = structnew() />
 		<cfset var sourceFile = "" />
+		<cfset var transformation = "" />
 		
 		<cfparam name="stFieldPost.NEW" default="" />
 		<cfparam name="stFieldPost.DELETE" default="false" /><!--- Boolean --->
@@ -43,18 +44,18 @@
 		</cfif>
 		
 	  	<cfif structkeyexists(form,arguments.uploadfield) and len(form[arguments.uploadfield])>
-	  	
+			
 	    	<cfif len(sourceFile)>
 	    		
 				<!--- This means there is already a file associated with this object. The new file must have the same name. --->
 				<cftry>
-					<cfset uploadFileName = application.fc.lib.cdn.ioUploadFile(location="images",destination=arguments.existingFile,field=arguments.uploadfield,sizeLimit=arguments.sizeLimit) />
+					<cfset uploadFileName = application.fc.lib.cdn.ioUploadFile(location="images",destination=sourceFile,nameconflict="makeunique",field=arguments.uploadfield,sizeLimit=arguments.sizeLimit) />
 					
 					<!--- Copy to Cloudinary --->
 					<cfif refindnocase("//res.cloudinary.com/",arguments.existingfile)>
-						<cfset stFile = uploadtocloudinary(uploadFileName,getCloudinaryID(arguments.existingfile)) />
+						<cfset stFile = uploadToCloudinary(file=uploadFileName,publicID=getCloudinaryID(arguments.existingfile)) />
 					<cfelse>
-						<cfset stFile = uploadtocloudinary(uploadFileName) />
+						<cfset stFile = uploadToCloudinary(file=uploadFileName) />
 					</cfif>
 					<cfset uploadFileName = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(uploadFileName)#" />
 					
@@ -74,7 +75,7 @@
 					<cfset uploadFileName = application.fc.lib.cdn.ioUploadFile(location="images",destination=arguments.destination,nameconflict="makeunique",acceptextensions=arguments.allowedExtensions,field=arguments.uploadfield,sizeLimit=arguments.sizeLimit) />
 					
 					<!--- Copy to Cloudinary --->
-					<cfset stFile = uploadtocloudinary(uploadFileName) />
+					<cfset stFile = uploadToCloudinary(uploadFileName) />
 					<cfset uploadFileName = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(uploadFileName)#" />
 					
 					<cfset stResult = passed(uploadFileName) />
@@ -270,11 +271,32 @@
 		
 		<cfif len(arguments.source) and not refindnocase("//res.cloudinary.com/",arguments.source)>
 			<cfreturn super.GenerateImage(argumentCollection=arguments) />
-		<cfelseif refindnocase("\?source=",arguments.source)>
-			<cfset stResult.bSuccess = False />
-			<cfset stResult.message = "Cloudinary source images must be resized during upload" />
-			<cfreturn stResult />
 		</cfif>
+		
+		<cfset format = createCloudinaryTransformation(arguments.width,arguments.height,arguments.resizeMethod) />
+		
+		<!--- Modify extension to convert image format --->
+		<cfif not len(arguments.convertImageToFormat)>
+			<cfset arguments.convertImageToFormat = listlast(listfirst(arguments.source,"?"),".") />
+		</cfif>
+		
+		<cfif refind("\?source=",arguments.source)>
+			<cfset stResult.filename = "//res.cloudinary.com/#application.config.cloudinary.cloudName#/image/upload/#format#/#getCloudinaryID(arguments.source)#.#arguments.convertImageToFormat#?source=#getCloudinarySource(arguments.source)#" />
+		<cfelse>
+			<cfset stResult.filename = "//res.cloudinary.com/#application.config.cloudinary.cloudName#/image/upload/#format#/#getCloudinaryID(arguments.source)#.#arguments.convertImageToFormat#" />
+		</cfif>
+		
+		<cfreturn stResult />
+	</cffunction>
+	
+	
+	<cffunction name="createCloudinaryTransformation" access="public" output="false" returntype="string" hint="Returns a Cloudinary transformation string">
+		<cfargument name="width" type="numeric" required="false" default="#application.config.image.StandardImageWidth#" hint="The maximum width of the new image." />
+		<cfargument name="height" type="numeric" required="false" default="#application.config.image.StandardImageHeight#" hint="The maximum height of the new image." />
+		<cfargument name="ResizeMethod" type="string" required="true" default="" hint="The y origin of the crop area. Options are center, topleft, topcenter, topright, left, right, bottomleft, bottomcenter, bottomright" />
+		
+		<cfset var format = "" />
+		<cfset var pixels = "" />
 		
 		<cfswitch expression="#arguments.ResizeMethod#">
 		
@@ -391,21 +413,13 @@
 			
 		</cfswitch>
 		
-		<!--- Modify extension to convert image format --->
-		<cfif not len(arguments.convertImageToFormat)>
-			<cfset arguments.convertImageToFormat = listlast(listfirst(arguments.source,"?"),".") />
-		</cfif>
-		
-		<cfset stResult.filename = "//res.cloudinary.com/#application.config.cloudinary.cloudName#/image/upload/#format#/#getCloudinaryID(arguments.source)#.#arguments.convertImageToFormat#" />
-		
-		<cfreturn stResult />
+		<cfreturn format />
 	</cffunction>
-	
-	
 	
 	<cffunction name="uploadToCloudinary" access="public" output="false" returntype="struct" hint="Uploads specified image to Cloudinary and returns Cloudinary image path">
 		<cfargument name="file" type="string" required="true" />
 		<cfargument name="publicID" type="string" required="false" default="#listfirst(listlast(arguments.file,'/'),'.')#_#application.fapi.getUUID()#" />
+		<cfargument name="transformation" type="string" required="false" default="" />
 		
 		<!--- GENERATE SIGNATURE --->
 		<cfset var sigTimestamp = DateDiff('s', CreateDate(1970,1,1), now()) />
@@ -431,6 +445,9 @@
 			<cfhttpparam type="formfield" name="public_id" value="#arguments.publicID#">
 			<cfhttpparam type="formfield" name="timestamp" value="#sigTimestamp#">
 			<cfhttpparam type="formfield" name="signature" value="#trim(sigSignature)#">
+			<cfif len(arguments.transformation)>
+				<cfhttpparam type="formfield" name="transformation" value="#arguments.transformation#" />
+			</cfif>
 			<cfhttpparam type="file" name="file" file="#application.fc.lib.cdn.ioReadFile(location='images',file=arguments.file,datatype='image').source#" />
 		</cfhttp>
 		
@@ -578,6 +595,10 @@
 		<cfargument name="admin" type="boolean" required="false" default="false" />
 		
 		<cfset var stResult = structnew() />
+		
+		<cfif not structkeyexists(arguments,"stObject")>
+			<cfset argument.stObject = application.fapi.getContentObject(typename=arguments.typename,objectid=arguments.objectid) />
+		</cfif>
 		
 		<!--- Throw an error if the field is empty --->
 		<cfif NOT len(arguments.stObject[arguments.stMetadata.name])>
