@@ -105,9 +105,12 @@
 		startdate = "#dateFormat(newTime,'dd/mmm/yyyy')#"
 		starttime = "#timeFormat(newTime,'hh:mm tt')#"
 		requesttimeout = "#stObj.timeout#">
-		
+	
+	<cffile action="append" file="#progressFile#" addnewline="true" output="Task rescheduled" />
 	<cfoutput>Task rescheduled<br></cfoutput>
 <cfelse>
+	<cffile action="append" file="#progressFile#" addnewline="true" output="Migration complete" />
+	
 	<cftry>
 		<cfschedule 
 			action="DELETE" 
@@ -115,6 +118,7 @@
 		
 		<cfcatch></cfcatch>
 	</cftry>
+	<cffile action="append" file="#progressFile#" addnewline="true" output="Task deleted" />
 	<cfoutput>Task deleted<br></cfoutput>
 	
 	<cfif structkeyexists(url,"notification")>
