@@ -605,6 +605,7 @@
 			<cfset stResult = structnew() />
 			<cfset stResult.method = "none" />
 			<cfset stResult.error = "No file defined" />
+			<cfset stResult.path = "" />
 			<cfreturn stResult />
 		</cfif>
 		
