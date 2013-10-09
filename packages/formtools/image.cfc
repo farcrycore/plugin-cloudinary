@@ -623,7 +623,7 @@
 	<cffunction name="getFileExists" access="public" output="false" returntype="boolean" hint="Returns true if file is non-empty and exists">
 		<cfargument name="file" type="string" required="true" />
 		
-		<cfif refindnocase("//res.cloudinary.com/.*\?_?source=",arguments.file)>
+		<cfif false and refindnocase("//res.cloudinary.com/.*\?_?source=",arguments.file)>
 			<cfreturn application.fc.lib.cdn.ioFileExists(location='images',file=getCloudinarySource(arguments.file)) />
 		<cfelseif refindnocase("//res.cloudinary.com/",arguments.file)>
 			<cfreturn true />
