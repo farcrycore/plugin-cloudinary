@@ -651,7 +651,7 @@
 			<cfset stResult["size"] = application.fc.lib.cdn.ioGetFileSize(location="images",file=getCloudinarySource(arguments.file)) />
 			
 			<cfif arguments.admin>
-				<cfset stResult["path"] = application.fc.lib.cdn.ioGetFileLocation(location="images",file=getCloudinarySource(arguments.stObject[arguments.stMetadata.name])).path />
+				<cfset stResult["path"] = application.fc.lib.cdn.ioGetFileLocation(location="images",file=getCloudinarySource(arguments.file)).path />
 			<cfelse>
 				<cfset stResult["path"] = rereplacenocase(arguments.file,"\?_?source=[^&]+","") />
 			</cfif>
