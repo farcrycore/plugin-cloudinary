@@ -243,8 +243,8 @@
 	<cffunction name="GenerateImage" access="public" output="false" returntype="struct">
 		<cfargument name="source" type="string" required="true" hint="The absolute path where the image that is being used to generate this new image is located." />
 		<cfargument name="destination" type="string" required="false" default="" hint="The absolute path where the image will be stored." />
-		<cfargument name="width" type="numeric" required="false" default="#application.config.image.StandardImageWidth#" hint="The maximum width of the new image." />
-		<cfargument name="height" type="numeric" required="false" default="#application.config.image.StandardImageHeight#" hint="The maximum height of the new image." />
+		<cfargument name="width" type="numeric" required="false" default="0" hint="The maximum width of the new image." />
+		<cfargument name="height" type="numeric" required="false" default="0" hint="The maximum height of the new image." />
 		<cfargument name="autoGenerateType" type="string" required="false" default="FitInside" hint="How is the new image to be generated (ForceSize,FitInside,Pad)" />
 		<cfargument name="padColor" type="string" required="false" default="##ffffff" hint="If AutoGenerateType='Pad', image will be padded with this colour" />
 		<cfargument name="customEffectsObjName" type="string" required="true" default="imageEffects" hint="The object name to run the effects on (must be in the package path)" />
@@ -291,8 +291,8 @@
 	
 	
 	<cffunction name="createCloudinaryTransformation" access="public" output="false" returntype="string" hint="Returns a Cloudinary transformation string">
-		<cfargument name="width" type="numeric" required="false" default="#application.config.image.StandardImageWidth#" hint="The maximum width of the new image." />
-		<cfargument name="height" type="numeric" required="false" default="#application.config.image.StandardImageHeight#" hint="The maximum height of the new image." />
+		<cfargument name="width" type="numeric" required="false" default="0" hint="The maximum width of the new image." />
+		<cfargument name="height" type="numeric" required="false" default="0" hint="The maximum height of the new image." />
 		<cfargument name="ResizeMethod" type="string" required="true" default="" hint="The y origin of the crop area. Options are center, topleft, topcenter, topright, left, right, bottomleft, bottomcenter, bottomright" />
 		
 		<cfset var format = "" />
