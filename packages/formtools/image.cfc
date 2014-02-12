@@ -659,12 +659,21 @@
 		<cfelseif refindnocase("//res.cloudinary.com/",arguments.file)>
 			
 			<cfhttp url="http:#rereplacenocase(arguments.file,'\?_?source=[^&]+','')#" getasbinary="yes" />
-			<cfimage action="info" source="#cfhttp.filecontent#" structName="stImage" />
-			
-			<cfset stResult["width"] = stImage.width />
-			<cfset stResult["height"] = stImage.height />
-			<cfset stResult["size"] = len(cfhttp.filecontent) />
-			<cfset stResult["path"] = arguments.file />
+
+			<cfif left(cfhttp.statusCode, 3) eq "200">
+				<cfimage action="info" source="#cfhttp.filecontent#" structName="stImage" />
+
+				<cfset stResult["width"] = stImage.width />
+				<cfset stResult["height"] = stImage.height />
+				<cfset stResult["size"] = len(cfhttp.filecontent) />
+				<cfset stResult["path"] = arguments.file />
+
+			<cfelse>
+				<cfset stResult["width"] = 0 />
+				<cfset stResult["height"] = 0 />
+				<cfset stResult["size"] = 0 />
+				<cfset stResult["path"] = "" />
+			</cfif>
 			
 		<cfelseif application.fc.lib.cdn.ioFileExists(location="images",file=arguments.file)>
 		
