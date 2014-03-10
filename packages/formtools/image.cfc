@@ -1,7 +1,7 @@
 <cfcomponent extends="farcry.core.packages.formtools.image" output="false" persistent="false">
 	
 	<cfproperty name="ftShowMetadata" type="boolean" default="false" hint="If this is set to false, the file size and dimensions of the current image are not displayed to the user" />
-	<cfproperty name="dbPrecision" type="string" default="500" />
+	<cfproperty name="dbPrecision" type="string" default="640" />
 	
 	<cffunction name="handleFilePost" access="public" output="false" returntype="struct" hint="Handles image post and returns standard formtool result struct">
 		<cfargument name="objectid" type="uuid" required="true" hint="The objectid of the edited object" />
