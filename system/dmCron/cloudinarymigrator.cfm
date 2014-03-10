@@ -1,7 +1,7 @@
 <cfsetting enablecfoutputonly="true" />
 <!--- @@displayname: Cloudinary migration --->
 
-<cfset filesPerTask = 20 />
+<cfset filesPerTask = 34 />
 <cfset progressFile = application.path.secureFilePath & "/cloudinarymigration.txt" />
 <cfset aSkipFiles = arraynew(1) />
 <cfset aSkipTypes = arraynew(1) />
@@ -32,10 +32,13 @@
 <cfset qWrong = querynew("typename,typelabel,property,seq,objectid,label,filename,issource","varchar,varchar,varchar,integer,varchar,varchar,varchar,bit") />
 
 <cfloop collection="#application.stCOAPI#" item="thistype">
-	<cfif qWrong.recordcount lt filesPerTask and not arrayfind(aSkipTypes,thistype) and listcontains("type,rule",application.stCOAPI[thistype].class)>
+	<!---<cffile action="append" file="#progressFile#" addnewline="true" output="Checking type:#thistype# (qWrong.recordcount=#qWrong.recordcount#)" />--->
+
+	<cfif qWrong.recordcount lt filesPerTask and not arrayFindNoCase(aSkipTypes,thistype) and listFindNoCase("type,rule",application.stCOAPI[thistype].class)>
 		<cfset processType = false />
 		
 		<cfloop collection="#application.stCOAPI[thistype].stProps#" item="thisprop">
+
 			<cfif qWrong.recordcount lt filesPerTask and isdefined("application.stCOAPI.#thistype#.stProps.#thisprop#.metadata.ftType") and application.stCOAPI[thistype].stProps[thisprop].metadata.ftType eq "image">
 				<cfset o = application.fapi.getContentType(typename=thistype) />
 				<cfquery datasource="#application.dsn#" name="q">
@@ -69,13 +72,19 @@
 	</cfif>
 </cfloop>
 
+<!---
+<cffile action="append" file="#progressFile#" addnewline="true" output="qWrong DUMP:#serializeJSON(qWrong)#" />
+--->
+
 <!--- process files --->
+<cftry>
 <cfloop query="qWrong">
 	<cfset stObject = application.fapi.getContentObject(typename=qWrong.typename,objectid=qWrong.objectid) />
 
 	<cfif not findnocase("//res.cloudinary.com/",stObject[qWrong.property])>
 		<cfif application.fc.lib.cdn.ioFileExists(location="images",file=stObject[qWrong.property])>
-			<cfset stFile = application.formtools.image.oFactory.uploadToCloudinary(file=stObject[qWrong.property]) />
+			<cfset cleanPublicID = reReplace(left(listfirst(listlast(stObject[qWrong.property],'/'),'.'), 64), "[^-a-zA-z0-9_.()\[\]]", "", "all") & "_" & application.fapi.getUUID()>
+			<cfset stFile = application.formtools.image.oFactory.uploadToCloudinary(file=stObject[qWrong.property], publicID=cleanPublicID) />
 			<cfset stObject[qWrong.property] = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(stObject[qWrong.property])#" />
 			
 			<cfset application.fapi.setData(stProperties=stObject) />
@@ -91,6 +100,14 @@
 		<cfoutput>Already migrated: <a href="#stObject[qWrong.property]#">#stObject[qWrong.property]#</a><br></cfoutput>
 	</cfif>
 </cfloop>
+<cfcatch>
+	<cfif structKeyExists(stObject, qWrong.property)>
+		<cffile action="append" file="#progressFile#" addnewline="true" output="Missing file:#stObject[qWrong.property]#" />
+		<cfoutput>Missing file: #stObject[qWrong.property]#<br></cfoutput>
+	</cfif>
+	<cffile action="append" file="#progressFile#" addnewline="true" output="FILE ERROR: #serializeJSON(cfcatch)#" />
+</cfcatch>
+</cftry>
 
 <cfif qWrong.recordcount>
 	<cfset newTime = dateadd("n",1,now()) />
