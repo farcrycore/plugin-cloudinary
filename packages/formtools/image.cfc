@@ -228,16 +228,14 @@
 		</cfif>
 		
 		<!--- Copy the source into the new field --->
-		<cfif len(sourcefilename) and not refindnocase("//res.cloudinary.com/",sourcefilename)>
-			<cfthrow message="Source has not been migrated to Cloudinary" />
+		<cfif len(sourcefilename) and refindnocase("//res.cloudinary.com/",sourcefilename)>
+			<!--- source=xxx => original file for this image; _source=xxx => temporary variable used for dependant cuts --->
+			<cfif refind("\?(source|_source)=",sourcefilename)>
+				<cfreturn passed(rereplace(sourcefilename,"\?_?source=[^&]+","") & "?_source=" & getCloudinarySource(sourcefilename)) />
+			</cfif>
 		</cfif>
-		
-		<!--- source=xxx => original file for this image; _source=xxx => temporary variable used for dependant cuts --->
-		<cfif refind("\?(source|_source)=",sourcefilename)>
-			<cfreturn passed(rereplace(sourcefilename,"\?_?source=[^&]+","") & "?_source=" & getCloudinarySource(sourcefilename)) />
-		<cfelse>
-			<cfreturn passed(sourcefilename) />
-		</cfif>
+
+		<cfreturn passed(sourcefilename) />
 	</cffunction>
 	
 	<cffunction name="GenerateImage" access="public" output="false" returntype="struct">
