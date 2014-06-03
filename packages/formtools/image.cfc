@@ -293,7 +293,7 @@
 		<cfargument name="height" type="numeric" required="false" default="0" hint="The maximum height of the new image." />
 		<cfargument name="ResizeMethod" type="string" required="true" default="" hint="The y origin of the crop area. Options are center, topleft, topcenter, topright, left, right, bottomleft, bottomcenter, bottomright" />
 		
-		<cfset var format = "" />
+		<cfset var format = "fl_keep_iptc" />
 		<cfset var pixels = "" />
 		
 		<cfswitch expression="#arguments.ResizeMethod#">
