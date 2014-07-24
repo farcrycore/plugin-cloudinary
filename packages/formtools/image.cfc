@@ -607,7 +607,7 @@
 			<cfreturn stResult />
 		</cfif>
 		
-		<cfif arguments.admin and refindnocase("\?_?source=",arguments.stObject[arguments.stMetadata.name])>
+		<cfif arguments.admin and refindnocase("\?source=",arguments.stObject[arguments.stMetadata.name])>
 			<cfset stResult = application.fc.lib.cdn.ioGetFileLocation(location="images",file=getCloudinarySource(arguments.stObject[arguments.stMetadata.name])) />
 		<cfelseif refindnocase("//res.cloudinary.com/",arguments.stObject[arguments.stMetadata.name])>
 			<cfset stResult.path = rereplace(arguments.stObject[arguments.stMetadata.name],"\?_?source=[^&]+","") />
@@ -640,7 +640,7 @@
 		<cfset var stImage = structnew() />
 		<cfset var stResult = structnew() />
 		
-		<cfif refindnocase("//res.cloudinary.com/.*\?_?source=",arguments.file) and application.fc.lib.cdn.ioFileExists(location='images',file=getCloudinarySource(arguments.file))>
+		<cfif refindnocase("//res.cloudinary.com/.*\?source=",arguments.file) and application.fc.lib.cdn.ioFileExists(location='images',file=getCloudinarySource(arguments.file))>
 			
 			<cfimage action="info" source="#application.fc.lib.cdn.ioReadFile(location='images',file=getCloudinarySource(arguments.file),datatype='image')#" structName="stImage" />
 			
