@@ -593,7 +593,8 @@
 		
 		<cfargument name="stMetadata" type="struct" required="false" hint="Property metadata" />
 		<cfargument name="admin" type="boolean" required="false" default="false" />
-		
+		<cfargument name="bRetrieve" type="boolean" required="false" default="true" />
+
 		<cfset var stResult = structnew() />
 		
 		<cfif not structkeyexists(arguments,"stObject")>
@@ -614,7 +615,7 @@
 		<cfelseif refindnocase("//res.cloudinary.com/",arguments.stObject[arguments.stMetadata.name])>
 			<cfset stResult.path = rereplace(arguments.stObject[arguments.stMetadata.name],"\?_?source=[^&]+","") />
 		<cfelse>
-			<cfset stResult = application.fc.lib.cdn.ioGetFileLocation(location="images",file=arguments.stObject[arguments.stMetadata.name],admin=arguments.admin) />
+			<cfset stResult = application.fc.lib.cdn.ioGetFileLocation(location="images",file=arguments.stObject[arguments.stMetadata.name],admin=arguments.admin,bRetrieve=arguments.bRetrieve) />
 		</cfif>
 		
 		<cfreturn stResult />
