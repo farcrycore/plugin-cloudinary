@@ -4,6 +4,7 @@
 		<subsection id="coapi">
 			<menu id="diagnostics">
 				<menuitem id="cloudinarymigrator" sequence="100" label="Cloudinary Migrator" link="/admin/customadmin.cfm?plugin=cloudinary&amp;module=utilities/cloudinarymigrator.cfm" />
+				<menuitem id="cloudinaryreset" sequence="101" label="Cloudinary Reset" link="/admin/customadmin.cfm?plugin=cloudinary&amp;module=utilities/cloudinaryreset.cfm" />
 			</menu>
 		</subsection>
 	</section>

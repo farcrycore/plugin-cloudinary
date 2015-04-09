@@ -235,6 +235,8 @@
 			<cfif refind("\?(source|_source)=",sourcefilename)>
 				<cfreturn passed(rereplace(sourcefilename,"\?_?source=[^&]+","") & "?_source=" & getCloudinarySource(sourcefilename)) />
 			</cfif>
+		<cfelseif len(sourcefilename) and application.fc.lib.cdn.ioFileExists(location="images",file=sourcefilename)>
+			<cfset sourcefilename = application.fc.lib.cdn.ioCopyFile(source_location="images",source_file=sourcefilename,dest_location="images",dest_file=arguments.destination & "/" & listlast(sourcefilename,"\/"),nameconflict="makeunique",uniqueamong="images") />
 		</cfif>
 
 		<cfreturn passed(sourcefilename) />
