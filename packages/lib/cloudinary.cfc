@@ -146,6 +146,10 @@ component {
 		
 		return format;
 	}
+
+	public boolean function isCloudinaryURL(required string sourceURL) {
+		return refindnocase("^//" & replace(getAPIDomain(),'.','\.','ALL') & "/[^/]+/image/fetch/", imageURL) gte 0;
+	}
 	
 	public string function fetch(required struct cropParams, required string sourceURL) {
 
@@ -157,7 +161,7 @@ component {
 		var fetchURL = "";
 		var imageURL = arguments.sourceURL;
 
-		if (refindnocase("^//" & replace(getAPIDomain(),'.','\.','ALL') & "/[^/]+/image/fetch/", imageURL)){
+		if (isCloudinaryURL(arguments.sourceURL)){
 			// splice a new transform into an existing Cloudinary URL
 
 			oldTransform = rereplace(imageURL, "^//" & replace(getAPIDomain(),'.','\.','ALL') & "/[^/]+/image/fetch/(.*)/https?://.*$","\1");
