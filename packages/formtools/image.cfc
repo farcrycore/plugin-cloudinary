@@ -364,7 +364,7 @@
 				
 				<cfswitch expression="#arguments.resizeMethod#">
 					<cfcase value="center">
-						<cfset format = listappend(format,"g_faces:center") />
+						<cfset format = listappend(format,"g_faces") />
 					</cfcase>
 					<cfcase value="topleft">
 						<cfset format = listappend(format,"g_north_west") />
