@@ -3,6 +3,43 @@
 	<cfproperty name="ftShowMetadata" type="boolean" default="false" hint="If this is set to false, the file size and dimensions of the current image are not displayed to the user" />
 	<cfproperty name="dbPrecision" type="string" default="640" />
 	
+	<cffunction name="ajax" output="false" returntype="string" hint="Response to ajax requests for this formtool">
+		<cfargument name="typename" required="true" type="string" hint="The name of the type that this field is part of.">
+		<cfargument name="stObject" required="true" type="struct" hint="The object of the record that this field is part of.">
+		<cfargument name="stMetadata" required="true" type="struct" hint="This is the metadata that is either setup as part of the type.cfc or overridden when calling ft:object by using the stMetadata argument.">
+		<cfargument name="fieldname" required="true" type="string" hint="This is the name that will be used for the form field. It includes the prefix that will be used by ft:processform.">
+		
+		<!--- NOTE: this function needs to be able to handle non-ajax responses --->
+		<!--- The main purpose of this override is to fix the result["filename"] value --->
+
+		<cfset var result = super.ajax(argumentCollection=arguments) />
+		<cfset var callback = "" />
+		<cfset var data = {} />
+		<cfset var sourcePath = {} />
+
+		<!--- Parse data produced by ajax --->
+		<cfif refind("^([^\(]+)\((.*)\)$", result)>
+			<cfset callback = rereplace(result, "^([^\(]+)\((.*)\)$", "\1") />
+			<cfset result = rereplace(result, "^([^\(]+)\((.*)\)$", "\2") />
+		</cfif>
+		<cfif isjson(result)>
+			<cfset data = deserializeJSON(result) />
+		</cfif>
+
+		<cfif isstruct(data) and structKeyExists(data, "value") and len(data.value)>
+			<cfset sourcePath = application.fc.lib.cloudinary.getSource(data.value) />
+			<cfset data["filename"] = listfirst(listlast(sourcePath,'/'),"?") />
+			<cfset result = serializeJSON(data) />
+		</cfif>
+
+		<!--- Re-add callback --->
+		<cfif len(callback)>
+			<cfset result = callback & "(" & result & ")" />
+		</cfif>
+
+		<cfreturn result />
+	</cffunction>
+
 	<cffunction name="handleFilePost" access="public" output="false" returntype="struct" hint="Handles image post and returns standard formtool result struct">
 		<cfargument name="objectid" type="uuid" required="true" hint="The objectid of the edited object" />
 		<cfargument name="existingfile" type="string" required="true" hint="Current value of property" />
