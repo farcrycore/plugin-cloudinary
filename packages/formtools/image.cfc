@@ -11,7 +11,7 @@
 
 		<cfset var html = super.edit(argumentCollection=arguments) />
 
-		<cfreturn rereplace(html, '<span class="image-filename">http%3A%2F%2F[^<]+%2F([^%]+)%2E(\w+)</span>', '<span class="image-filename">\1.\2</span>') />
+		<cfreturn rereplace(html, '<span class="image-filename">http%3A%2F%2F[^<]+%2F([^<]+)%2E(\w+)</span>', '<span class="image-filename">\1.\2</span>') />
 	</cffunction>
 		
 	<cffunction name="ajax" output="false" returntype="string" hint="Response to ajax requests for this formtool">
