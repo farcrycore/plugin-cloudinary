@@ -3,6 +3,17 @@
 	<cfproperty name="ftShowMetadata" type="boolean" default="false" hint="If this is set to false, the file size and dimensions of the current image are not displayed to the user" />
 	<cfproperty name="dbPrecision" type="string" default="640" />
 	
+	<cffunction name="edit" output="false" returntype="string">
+		<cfargument name="typename" required="true" type="string" hint="The name of the type that this field is part of.">
+		<cfargument name="stObject" required="true" type="struct" hint="The object of the record that this field is part of.">
+		<cfargument name="stMetadata" required="true" type="struct" hint="This is the metadata that is either setup as part of the type.cfc or overridden when calling ft:object by using the stMetadata argument.">
+		<cfargument name="fieldname" required="true" type="string" hint="This is the name that will be used for the form field. It includes the prefix that will be used by ft:processform.">
+
+		<cfset var html = super.edit(argumentCollection=arguments) />
+
+		<cfreturn rereplace(html, '<span class="image-filename">http%3A%2F%2F[^<]+%2F([^%]+)%2E(\w+)</span>', '<span class="image-filename">\1.\2</span>') />
+	</cffunction>
+		
 	<cffunction name="ajax" output="false" returntype="string" hint="Response to ajax requests for this formtool">
 		<cfargument name="typename" required="true" type="string" hint="The name of the type that this field is part of.">
 		<cfargument name="stObject" required="true" type="struct" hint="The object of the record that this field is part of.">
