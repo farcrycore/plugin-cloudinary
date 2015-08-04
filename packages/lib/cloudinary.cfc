@@ -210,6 +210,10 @@ component {
 			stResult["type"] = "post";
 			if (refindnocase("\?_?source=", arguments.file)){
 				stResult["source"] = urldecode(rereplacenocase(arguments.file, ".*\?_?source=([^&]+).*","\1"));
+
+				if (refindnocase("\?source=", arguments.file)){
+					stResult["dependant"] = false;
+				}
 			}
 			stResult["transformation"] = rereplace(arguments.file, rePost, "\1");
 			if (len(stResult["transformation"])){
@@ -321,6 +325,7 @@ component {
 		var stResult = structnew();
 		var cfhttp = structnew();
 		var publicID = "";
+		var stInfo = getURLInformation(arguments.file);
 
 		var cloudName = application.fapi.getConfig("cloudinary", "cloudName", "");
 		var apiKey = application.fapi.getConfig("cloudinary", "apiKey", "");
@@ -330,7 +335,11 @@ component {
 			throw(message="Cloudinary has not been configured - add the Cloud Name, API Key and API Secret");
 		}
 		
-		publicID = getCloudinaryID(arguments.file);
+		if (stInfo.type != "post"){
+			return {};
+		}
+
+		publicID = getID(arguments.file);
 		sigSignature = lcase( hash( "public_id=#publicID#&timestamp=#sigTimestamp##apiSecret#" ,"SHA" ) );
 		
 		// DELETE FROM CLOUDINARY

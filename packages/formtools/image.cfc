@@ -384,6 +384,40 @@
 		</cfif>
 	</cffunction>
 	
+	<cffunction name="onArchive" access="public" output="false" returntype="string" hint="Called from setData when an object is deleted">
+		<cfargument name="typename" required="true" type="string" hint="The name of the type that this field is part of.">
+		<cfargument name="stObject" required="true" type="struct" hint="The object of the record that this field is part of.">
+		<cfargument name="stMetadata" required="true" type="struct" hint="This is the metadata that is either setup as part of the type.cfc or overridden when calling ft:object by using the stMetadata argument.">
+		<cfargument name="archiveID" type="uuid" required="true" hint="The ID of the new archive" />
+		
+		<cfset var stInfo = application.fc.lib.cloudinary.getURLInformation(arguments.stObject[arguments.stMetadata.name]) />
+		<cfset var archiveFile = "" />
+		
+		<cfif len(stInfo.source) and application.fc.lib.cdn.ioFileExists(location="images",file=stInfo.source)>
+			<cfset archiveFile = "/#arguments.stObject.typename#/#arguments.archiveID#.#arguments.stMetadata.name#.#ListLast(stInfo.source,'.')#" />
+			
+			<cfset application.fc.lib.cdn.ioCopyFile(source_location="images",source_file=stInfo.source,dest_location="archive",dest_file=archiveFile) />
+		</cfif>
+		
+		<cfreturn archiveFile />
+	</cffunction>
+	
+	<cffunction name="onRollback" access="public" output="false" returntype="string" hint="Called from setData when an object is deleted">
+		<cfargument name="typename" required="true" type="string" hint="The name of the type that this field is part of.">
+		<cfargument name="stObject" required="true" type="struct" hint="The object of the record that this field is part of.">
+		<cfargument name="stMetadata" required="true" type="struct" hint="This is the metadata that is either setup as part of the type.cfc or overridden when calling ft:object by using the stMetadata argument.">
+		<cfargument name="archiveID" type="uuid" required="true" hint="The ID of the archive being rolled back" />
+		
+		<cfset var stInfo = application.fc.lib.cloudinary.getURLInformation(arguments.stObject[arguments.stMetadata.name]) />
+		<cfset var archiveFile = "/#arguments.stObject.typename#/#arguments.archiveID#.#arguments.stMetadata.name#.#ListLast(arguments.stObject[arguments.stMetadata.name],'.')#" />
+		
+		<cfif len(stInfo.source) and application.fc.lib.cdn.ioFileExists(location="archive", file=archiveFile) and not application.fc.lib.cdn.ioFileExists(location="images", file=stInfo.source)>
+			<cfset application.fc.lib.cdn.ioMoveFile(source_location="archive",source_file=archiveFile,dest_location="images",dest_file=stInfo.source) />
+		</cfif>
+
+		<cfreturn arguments.stObject[arguments.stMetadata.name] />
+	</cffunction>
+	
 	<cffunction name="getFileLocation" access="public" output="false" returntype="struct" hint="Returns information used to access the file: type (stream | redirect), path (file system path | absolute URL), filename, mime type">
 		<cfargument name="objectid" type="string" required="false" default="" hint="Object to retrieve" />
 		<cfargument name="typename" type="string" required="false" default="" hint="Type of the object to retrieve" />
