@@ -276,9 +276,7 @@
 		<!--- Copy the source into the new field --->
 		<cfif len(sourcefilename) and refindnocase("//res.cloudinary.com/",sourcefilename)>
 			<!--- source=xxx => original file for this image; _source=xxx => temporary variable used for dependant cuts --->
-			<cfif refind("\?(source|_source)=",sourcefilename)>
-				<cfreturn passed(rereplace(sourcefilename,"\?_?source=[^&]+","") & "?_source=" & application.fc.lib.cloudinary.getSource(sourcefilename)) />
-			</cfif>
+			<cfset sourcefilename = replace(sourcefilename,"?source=","?_source=") />
 		<cfelseif len(sourcefilename) and application.fc.lib.cdn.ioFileExists(location="images",file=sourcefilename)>
 			<cfset sourcefilename = application.fc.lib.cdn.ioCopyFile(source_location="images",source_file=sourcefilename,dest_location="images",dest_file=arguments.destination & "/" & listlast(sourcefilename,"\/"),nameconflict="makeunique",uniqueamong="images") />
 		</cfif>
@@ -446,7 +444,7 @@
 		<cfif arguments.admin and refindnocase("\?source=",arguments.stObject[arguments.stMetadata.name])>
 			<cfset stResult = application.fc.lib.cdn.ioGetFileLocation(location="images",file=application.fc.lib.cloudinary.getSource(arguments.stObject[arguments.stMetadata.name])) />
 		<cfelseif refindnocase("//res.cloudinary.com/",arguments.stObject[arguments.stMetadata.name])>
-			<cfset stResult.path = rereplace(arguments.stObject[arguments.stMetadata.name],"\?_?source=[^&]+","") />
+			<cfset stResult.path = rereplace(arguments.stObject[arguments.stMetadata.name],"\?.*","") />
 		<cfelse>
 			<cfset stResult = application.fc.lib.cdn.ioGetFileLocation(location="images",file=arguments.stObject[arguments.stMetadata.name],admin=arguments.admin,bRetrieve=arguments.bRetrieve) />
 		</cfif>

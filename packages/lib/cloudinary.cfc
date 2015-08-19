@@ -196,7 +196,7 @@ component {
 			stResult["template"] = rereplace(stResult.untransformed, "/fetch/", "/fetch/{transformation}/");
 		}
 
-		else if (refindnocase(reAuto, arguments.file)){
+		else if (len(autoUploadFolder) and refindnocase(reAuto, arguments.file)){
 			stResult["type"] = "auto";
 			stResult["source"] = rereplacenocase(arguments.file, reAuto, "\2");
 			stResult["transformation"] = rereplace(arguments.file, reAuto, "\1")
@@ -214,8 +214,14 @@ component {
 				if (refindnocase("\?source=", arguments.file)){
 					stResult["dependant"] = false;
 				}
+				else {
+					stResult["dependant"] = true;
+				}
 			}
 			stResult["transformation"] = rereplace(arguments.file, rePost, "\1");
+			if (len(stResult.source)){
+				stResult["transformation"] = stResult["transformation"] & "?" & (stResult.dependant ? "_" : "") & "source=" & stResult.source;
+			}
 			if (len(stResult["transformation"])){
 				stResult["untransformed"] = apiURLPrefix & "/upload" & rereplace(arguments.file, rePost, "\2") & rereplace(arguments.file, rePost, "\3");
 			};
