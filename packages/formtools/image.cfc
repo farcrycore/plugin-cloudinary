@@ -23,10 +23,86 @@
 		<!--- NOTE: this function needs to be able to handle non-ajax responses --->
 		<!--- The main purpose of this override is to fix the result["filename"] value --->
 
-		<cfset var result = super.ajax(argumentCollection=arguments) />
+		<cfset var result = "" />
 		<cfset var callback = "" />
 		<cfset var data = {} />
 		<cfset var sourcePath = {} />
+		<cfset var stSource = "" />
+		<cfset var sourceField = "" />
+		<cfset var stInfo = "" />
+		<cfset var prefix = left(arguments.fieldname,len(arguments.fieldname)-len(arguments.stMetadata.name)) />
+
+		<cfif structkeyexists(url,"crop")>
+			<cfset stSource = arguments.stObject />
+			<cfset sourceField = listfirst(arguments.stMetadata.ftSourceField,":") />
+			<cfif isArray(stSource[sourceField]) and arrayLen(stSource[sourceField])>
+				<cfset stSource = application.fapi.getContentObject(objectid=stSource[sourceField][1]) />
+				<cfset sourceField = listlast(arguments.stMetadata.ftSourceField,":") />
+			<cfelseif issimplevalue(stSource[sourceField]) and isvalid("uuid",stSource[sourceField])>
+				<cfset stSource = application.fapi.getContentObject(objectid=stSource[sourceField]) />
+				<cfset sourceField = listlast(arguments.stMetadata.ftSourceField,":") />
+			</cfif>
+
+			<cfif not structkeyexists(arguments.stMetadata,"ftImageWidth") or not isnumeric(arguments.stMetadata.ftImageWidth)><cfset arguments.stMetadata.ftImageWidth = 0 /></cfif>
+			<cfif not structkeyexists(arguments.stMetadata,"ftImageHeight") or not isnumeric(arguments.stMetadata.ftImageHeight)><cfset arguments.stMetadata.ftImageHeight = 0 /></cfif>
+			<cfparam name="arguments.stMetadata.ftAllowResizeQuality" default="false">
+			<cfparam name="url.allowcancel" default="1" />
+
+			<cfif len(sourceField)>
+				<cfset stInfo = application.fc.lib.cloudinary.getURLInformation(stSource[sourceField]) />
+
+				<cfsavecontent variable="html"><cfoutput>
+					<div style="float:left;background-color:##cccccc;height:100%;width:65%;margin-right:1%;">
+						<img id="cropable-image" src="#stInfo.untransformed#" style="max-width:none;" />
+					</div>
+					<div style="float:left;width:33%;">
+						<div class="image-crop-instructions" style="overflow-y:auto;overlow-y:hidden;">
+							<p class="image-resize-information alert alert-info">
+								<strong style="font-weight:bold">Selection:</strong><br>
+								Coordinates: (<span id="image-crop-a-x">?</span>,<span id="image-crop-a-y">?</span>) to (<span id="image-crop-b-x">?</span>,<span id="image-crop-b-y">?</span>)<br>
+								<span id="image-crop-dimensions">Dimensions: <span id="image-crop-width">?</span>px x <span id="image-crop-height">?</span>px</span><br>
+								<cfif arguments.stMetadata.ftImageWidth gt 0 and arguments.stMetadata.ftImageHeight gt 0>
+									Ratio:
+									<cfif arguments.stMetadata.ftImageWidth gt arguments.stMetadata.ftImageHeight>
+										#numberformat(arguments.stMetadata.ftImageWidth/arguments.stMetadata.ftImageHeight,"9.99")#:1
+									<cfelseif arguments.stMetadata.ftImageWidth lt arguments.stMetadata.ftImageHeight>
+										1:#numberformat(arguments.stMetadata.ftImageHeight/arguments.stMetadata.ftImageWidth,"9.99")#
+									<cfelse><!--- Equal --->
+										1:1
+									</cfif> <span style="font-style:italic;">(Fixed aspect ratio)</span><br>
+								<cfelse>
+									Ratio: <span id="image-crop-ratio-num">?</span>:<span id="image-crop-ratio-den">?</span><br>
+								</cfif>
+								<strong style="font-weight:bold">Output:</strong><br>
+								Dimensions: <span id="image-crop-width-final">#arguments.stMetadata.ftImageWidth#</span>px x <span id="image-crop-height-final">#arguments.stMetadata.ftImageHeight#</span>px<br>
+								Quality: <cfif arguments.stMetadata.ftAllowResizeQuality><input id="image-crop-quality" value="#arguments.stMetadata.ftQuality#" /><cfelse>#round(arguments.stMetadata.ftQuality*100)#%<input type="hidden" id="image-crop-quality" value="#arguments.stMetadata.ftQuality#" /></cfif>
+							</p>
+							<p id="image-crop-warning" class="alert alert-warning" style="display:none;">
+								<strong style="font-weight:bold">Warning:</strong> The selected crop area is smaller than the output size. To avoid poor image quality choose a larger crop or use a higher resolution source image.
+							</p>
+							<p style="margin-top: 0.7em">To select a crop area:</p>
+							<ol style="padding-left:10px;padding-top:0.7em">
+								<li style="list-style:decimal outside;">Click and drag from the point on the image where the top left corner of the crop will start to the bottom right corner where the crop will finish.</li>
+								<li style="list-style:decimal outside;">You can drag the selection box around the image if it isn't in the right place, or drag the edges and corners if the box isn't the right shape.</li>
+								<li style="list-style:decimal outside;">Click "Crop and Resize" when you're done.</li>
+							</ol>
+						</div>
+						<div class="image-crop-actions">
+							<button id="image-crop-finalize" class="btn btn-large btn-primary" onclick="$fc.imageformtool('#prefix#','#arguments.stMetadata.name#').finalizeCrop();return false;">Crop and Resize</button>
+							<cfif url.allowcancel>
+								<a href="##" id="image-crop-cancel" class="btn btn-link" style="border:none;box-shadow:none;background:none">Cancel</a>
+							</cfif>
+						</div>
+					</div>
+				</cfoutput></cfsavecontent>
+
+				<cfreturn html />
+			<cfelse>
+				<cfreturn "<p>The source field is empty. <a href='##' onclick='$fc.imageformtool('#prefix#','#arguments.stMetadata.name#').endCrop();return false;'>Close</a></p>" />
+			</cfif>
+		</cfif>
+
+		<cfset result = super.ajax(argumentCollection=arguments) />
 
 		<!--- Parse data produced by ajax --->
 		<cfif refind("^([^\(]+)\((.*)\)$", result)>
