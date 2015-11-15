@@ -102,7 +102,7 @@ component {
 				
 				switch (arguments.crop){
 					case "center":
-						format = listappend(format,"g_faces");
+						format = listappend(format,"g_faces:center");
 						break;
 					case "topleft":
 						format = listappend(format,"g_north_west");
