@@ -199,7 +199,7 @@ component {
 		else if (len(autoUploadFolder) and refindnocase(reAuto, arguments.file)){
 			stResult["type"] = "auto";
 			stResult["source"] = rereplacenocase(arguments.file, reAuto, "\2");
-			stResult["transformation"] = rereplace(arguments.file, reAuto, "\1")
+			stResult["transformation"] = rereplace(arguments.file, reAuto, "\1");
 			if (len(stResult["transformation"])){
 				stResult["untransformed"] = apiURLPrefix & "/upload" & autoUploadFolder & stResult.source;
 			}
