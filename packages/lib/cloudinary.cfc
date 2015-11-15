@@ -24,59 +24,59 @@ component {
 
 	public string function getTransform(numeric width=0, numeric height=0, string crop="FitInside", string format=""){
 		
-		var format = "fl_keep_iptc";
+		var transform = "fl_keep_iptc";
 		var pixels = "";
 		
 		switch (lcase(arguments.crop)){
 			case "forcesize":
 				// Simply force the resize of the image into the width/height provided
-				format = listappend(format,"c_scale");
+				transform = listappend(transform,"c_scale");
 				
 				if (arguments.width gt 0){
-					format = listappend(format,"w_#arguments.width#");
+					transform = listappend(transform,"w_#arguments.width#");
 				}
 				
 				if (arguments.height gt 0){
-					format = listappend(format,"h_#arguments.height#");
+					transform = listappend(transform,"h_#arguments.height#");
 				}
 
 				break;
 			
 			case "fitinside":
-				format = listappend(format,"c_fit");
+				transform = listappend(transform,"c_fit");
 				
 				if (arguments.width gt 0){
-					format = listappend(format,"w_#arguments.width#");
+					transform = listappend(transform,"w_#arguments.width#");
 				}
 				
 				if (arguments.height gt 0){
-					format = listappend(format,"h_#arguments.height#");
+					transform = listappend(transform,"h_#arguments.height#");
 				}
 
 				break;
 			
 			case "croptofit":
-				format = listappend(format,"c_fill");
+				transform = listappend(transform,"c_fill");
 				
 				if (arguments.width gt 0){
-					format = listappend(format,"w_#arguments.width#");
+					transform = listappend(transform,"w_#arguments.width#");
 				}
 				
 				if (arguments.height gt 0){
-					format = listappend(format,"h_#arguments.height#");
+					transform = listappend(transform,"h_#arguments.height#");
 				}
 				
 				break;
 	
 			case "pad":
-				format = listappend(format,"c_pad");
+				transform = listappend(transform,"c_pad");
 				
 				if (arguments.width gt 0){
-					format = listappend(format,"w_#arguments.width#");
+					transform = listappend(transform,"w_#arguments.width#");
 				}
 				
 				if (arguments.height gt 0){
-					format = listappend(format,"h_#arguments.height#");
+					transform = listappend(transform,"h_#arguments.height#");
 				}
 				
 				break;
@@ -90,43 +90,43 @@ component {
 			case "bottomleft": 
 			case "bottomcenter": 
 			case "bottomright":
-				format = listappend(format,"c_fill");
+				transform = listappend(transform,"c_fill");
 				
 				if (arguments.width gt 0){
-					format = listappend(format,"w_#arguments.width#");
+					transform = listappend(transform,"w_#arguments.width#");
 				}
 				
 				if (arguments.height gt 0){
-					format = listappend(format,"h_#arguments.height#");
+					transform = listappend(transform,"h_#arguments.height#");
 				}
 				
 				switch (arguments.crop){
 					case "center":
-						format = listappend(format,"g_faces:center");
+						transform = listappend(transform,"g_faces:center");
 						break;
 					case "topleft":
-						format = listappend(format,"g_north_west");
+						transform = listappend(transform,"g_north_west");
 						break;
 					case "topcenter":
-						format = listappend(format,"g_north");
+						transform = listappend(transform,"g_north");
 						break;
 					case "topright":
-						format = listappend(format,"g_north_east");
+						transform = listappend(transform,"g_north_east");
 						break;
 					case "left":
-						format = listappend(format,"g_west");
+						transform = listappend(transform,"g_west");
 						break;
 					case "right":
-						format = listappend(format,"g_east");
+						transform = listappend(transform,"g_east");
 						break;
 					case "bottomleft":
-						format = listappend(format,"g_south_west");
+						transform = listappend(transform,"g_south_west");
 						break;
 					case "bottomcenter":
-						format = listappend(format,"g_south");
+						transform = listappend(transform,"g_south");
 						break;
 					case "bottomright":
-						format = listappend(format,"g_south_east");
+						transform = listappend(transform,"g_south_east");
 						break;
 				}
 
@@ -137,30 +137,30 @@ component {
 					pixels = listtoarray(arguments.crop,",-");
 					
 					// crop to selected section
-					format = listappend(format,"x_#pixels[1]#,y_#pixels[2]#,w_#pixels[3]-pixels[1]#,h_#pixels[4]-pixels[2]#,c_crop");
+					transform = listappend(transform,"x_#pixels[1]#,y_#pixels[2]#,w_#pixels[3]-pixels[1]#,h_#pixels[4]-pixels[2]#,c_crop");
 					
 					// resize selected section to required size
-					format = format & "/c_fit";
+					transform = transform & "/c_fit";
 					
 					if (arguments.Width gt 0){
-						format = listappend(format,"w_#arguments.width#");
+						transform = listappend(transform,"w_#arguments.width#");
 					}
 					
 					if (arguments.Height gt 0){
-						format = listappend(format,"h_#arguments.height#");
+						transform = listappend(transform,"h_#arguments.height#");
 					}
 				}
 		}
 		
 		switch (arguments.format){
 			case "png":
-				format = listappend(format,"f_png");
+				transform = listappend(transform,"f_png");
 				break;
 			case "auto":
-				format = listappend(format, "f_auto");
+				transform = listappend(transform, "f_auto");
 		}
 
-		return format;
+		return transform;
 	}
 
 	public struct function getURLInformation(required string file) {
