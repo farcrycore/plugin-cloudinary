@@ -1,4 +1,5 @@
-component {
+<cfcomponent>
+	<cfscript>
 	
 	public any function init() {
 		return this;
@@ -270,51 +271,17 @@ component {
 		return replace(stInfo.template, "{transformation}", arguments.transformation);
 	}
 
-	public struct function upload(required string file, string publicID, string transformation){
-		var sigTimestamp = DateDiff('s', CreateDate(1970,1,1), now());
-		var sigSignature = "";
-		var stResult = structnew();
-		var cfhttp = structnew();
-		var cloudName = application.fapi.getConfig("cloudinary", "cloudName", "");
-		var apiKey = application.fapi.getConfig("cloudinary", "apiKey", "");
-		var apiSecret = application.fapi.getConfig("cloudinary", "apiSecret", "");
+	public string function getID(required string file){
 		
-		if (not len(cloudName) or not len(apiKey) or not len(apiSecret)){
-			throw message="Cloudinary has not been configured - add the Cloud Name, API Key and API Secret";
-		}
-		
-		sigSignature = lcase( hash( "public_id=#arguments.publicID#&timestamp=#sigTimestamp##apiSecret#" ,"SHA" ) );
-		
-		// UPLOAD TO CLOUDINARY
-		http url="https://api.cloudinary.com/v1_1/#cloudName#/image/upload" method="POST" multipart="true" {
-			httpparam type="formfield" name="api_key" value="#apiKey#";
-			httpparam type="formfield" name="public_id" value="#arguments.publicID#";
-			httpparam type="formfield" name="timestamp" value="#sigTimestamp#";
-			httpparam type="formfield" name="signature" value="#trim(sigSignature)#";
-			if (len(arguments.transformation)){
-				httpparam type="formfield" name="transformation" value="#arguments.transformation#";
-			}
-			httpparam type="file" name="file" file="#application.fc.lib.cdn.ioReadFile(location='images',file=arguments.file,datatype='image').source#";
-		}
-		
-		if (isjson(cfhttp.filecontent)){
-			stResult = deserializejson(cfhttp.filecontent);
-			stResult["urlWithSource"] = mid(stResult.url,6,len(stResult.url)) & "?source=#urlencodedformat(arguments.file)#";
-		}
-		
-		if (cfhttp.StatusCode neq "200 Ok"){
-			if (structkeyexists(stResult,"error")){
-				// Cloudinary threw error, returned information
-				throw(message="Error uploading to Cloudinary: #stResult.error.message#", detail="#cfhttp.filecontent.toString()#");
-			}
-			else {
-				// Cloudinary threw error, no information
-				throw(message="Error uploading to Cloudinary", detail="#cfhttp.filecontent.toString()#");
-			}
-		}
-		
-		return stResult;
+		return urldecode(listfirst(listlast(listfirst(arguments.file,"?"),"/"),"."));
 	}
+	
+	public string function getSource(required string file){
+		var stInfo = getURLInformation(arguments.file);
+
+		return stInfo.source;
+	}
+
 	
 	public string function fetch(required string file) {
 		var endpoint = getAPIEndpoint();
@@ -337,90 +304,135 @@ component {
 		var autoUploadFolder = application.fapi.getConfig("cloudinary", "autoUplaodFolder", "");
 
 		return "#endpoint#/image/upload/#autoUploadFolder##arguments.file#";
-	}
+	}	
 
-	public struct function delete(required string file){
-		var sigTimestamp = DateDiff('s', CreateDate(1970,1,1), now());
-		var sigSignature = "";
-		var stResult = structnew();
-		var cfhttp = structnew();
-		var publicID = "";
-		var stInfo = getURLInformation(arguments.file);
+	</cfscript>
 
-		var cloudName = application.fapi.getConfig("cloudinary", "cloudName", "");
-		var apiKey = application.fapi.getConfig("cloudinary", "apiKey", "");
-		var apiSecret = application.fapi.getConfig("cloudinary", "apiSecret", "");
-		
-		if (not len(cloudName) or not len(apiKey) or not len(apiSecret)){
-			throw(message="Cloudinary has not been configured - add the Cloud Name, API Key and API Secret");
-		}
-		
-		if (stInfo.type != "post"){
-			return {};
-		}
 
-		publicID = getID(arguments.file);
-		sigSignature = lcase( hash( "public_id=#publicID#&timestamp=#sigTimestamp##apiSecret#" ,"SHA" ) );
-		
-		// DELETE FROM CLOUDINARY
-		http url="https://api.cloudinary.com/v1_1/#cloudName#/resources/image/upload?public_ids=#publicID#" method="DELETE" username="#apiKey#" password="#apiSecret#";
-		
-		if (isjson(cfhttp.filecontent)){
-			stResult = deserializejson(cfhttp.filecontent);
-		}
-		
-		if (cfhttp.StatusCode neq "200 Ok"){
-			if (structkeyexists(stResult,"error")){
-				// Cloudinary threw error, returned information
-				throw(message="Error deleting from Cloudinary: #stResult.error.message#", detail="#cfhttp.filecontent.toString()#");
-			}
-			else {
-				// Cloudinary threw error, no information
-				throw(message="Error deleting from Cloudinary", detail="#cfhttp.filecontent.toString()#");
-			}
-		}
-		
-		return stResult;
-	}
-	
-	public struct function getInfo(required string file){
-		var cfhttp = structnew();
-		var publicID = getID(arguments.file);
-		var stResult = structnew();
-		
-		if (not refindnocase("//res.cloudinary.com/",arguments.file)){
-			throw(message="Source has not been migrated to Cloudinary");
-		}
-		
-		http url="https://api.cloudinary.com/v1_1/#cloudName#/resources/image/upload/#publicID#" username="#apiKey#" password="#apiSecret#";
-		
-		if (isjson(cfhttp.filecontent)){
-			stResult = deserializejson(cfhttp.filecontent);
-		}
-		
-		if (cfhttp.StatusCode neq "200 Ok"){
-			if (structkeyexists(stResult,"error")){
-				// Cloudinary threw error, returned information
-				throw(message="Error querying Cloudinary: #stResult.error.message#", detail="#cfhttp.filecontent.toString()#");
-			}
-			else {
-				// Cloudinary threw error, no information
-				throw(message="Error querying Cloudinary", detail="#cfhttp.filecontent.toString()#");
-			}
-		}
-		
-		return stResult;
-	}
-	
-	public string function getID(required string file){
-		
-		return urldecode(listfirst(listlast(listfirst(arguments.file,"?"),"/"),"."));
-	}
-	
-	public string function getSource(required string file){
-		var stInfo = getURLInformation(arguments.file);
+	<cffunction name="upload" access="public" output="false" returntype="struct">
+		<cfargument name="file" type="string" required="true">
+		<cfargument name="publicID" type="string" required="true">
+		<cfargument name="transformation" type="string" required="true">
 
-		return stInfo.source;
-	}
+		<cfset var sigTimestamp = DateDiff('s', CreateDate(1970,1,1), now())>
+		<cfset var sigSignature = "">
+		<cfset var stResult = structnew()>
+		<cfset var stResponse = structnew()>
+		<cfset var cloudName = application.fapi.getConfig("cloudinary", "cloudName", "")>
+		<cfset var apiKey = application.fapi.getConfig("cloudinary", "apiKey", "")>
+		<cfset var apiSecret = application.fapi.getConfig("cloudinary", "apiSecret", "")>
+		
+		<cfif not len(cloudName) or not len(apiKey) or not len(apiSecret)>
+			<cfthrow message="Cloudinary has not been configured - add the Cloud Name, API Key and API Secret">
+		</cfif>
+		
+		<cfset sigSignature = lcase( hash( "public_id=#arguments.publicID#&timestamp=#sigTimestamp##apiSecret#" ,"SHA" ) )>
+		
+		<!--- UPLOAD TO CLOUDINARY --->
+		<cfhttp url="https://api.cloudinary.com/v1_1/#cloudName#/image/upload" method="POST" multipart="true" result="stResponse">
+			<cfhttpparam type="formfield" name="api_key" value="#apiKey#">
+			<cfhttpparam type="formfield" name="public_id" value="#arguments.publicID#">
+			<cfhttpparam type="formfield" name="timestamp" value="#sigTimestamp#">
+			<cfhttpparam type="formfield" name="signature" value="#trim(sigSignature)#">
+			<cfif len(arguments.transformation)>
+				<cfhttpparam type="formfield" name="transformation" value="#arguments.transformation#">
+			</cfif>
+			<cfhttpparam type="file" name="file" file="#application.fc.lib.cdn.ioReadFile(location='images',file=arguments.file,datatype='image').source#">
+		</cfhttp>
+		
+		<cfif isjson(stResponse.filecontent)>
+			<cfset stResult = deserializejson(stResponse.filecontent)>
+			<cfset stResult["urlWithSource"] = mid(stResult.url,6,len(stResult.url)) & "?source=#urlencodedformat(arguments.file)#">
+		</cfif>
+		
+		<cfif stResponse.StatusCode neq "200 Ok">
+			<cfif structkeyexists(stResult,"error")>
+				<!--- Cloudinary threw error, returned information --->
+				<cfthrow message="Error uploading to Cloudinary: #stResult.error.message#" detail="#stResponse.filecontent.toString()#">
+			<cfelse>
+				<!--- Cloudinary threw error, no information --->
+				<cfthrow message="Error uploading to Cloudinary" detail="#stResponse.filecontent.toString()#">
+			</cfif>
+		</cfif>
+		
+		<cfreturn stResult>
+	</cffunction>
+
+
+
+	<cffunction name="delete" access="public" output="false" returntype="struct">
+		<cfargument name="file" type="string" required="true">
+
+		<cfset var sigTimestamp = DateDiff('s', CreateDate(1970,1,1), now())>
+		<cfset var sigSignature = "">
+		<cfset var stResult = structnew()>
+		<cfset var stResponse = structnew()>
+		<cfset var publicID = "">
+		<cfset var stInfo = getURLInformation(arguments.file)>
+
+		<cfset var cloudName = application.fapi.getConfig("cloudinary", "cloudName", "")>
+		<cfset var apiKey = application.fapi.getConfig("cloudinary", "apiKey", "")>
+		<cfset var apiSecret = application.fapi.getConfig("cloudinary", "apiSecret", "")>
+		
+		<cfif not len(cloudName) or not len(apiKey) or not len(apiSecret)>
+			<cfthrow message="Cloudinary has not been configured - add the Cloud Name, API Key and API Secret">
+		</cfif>
+		
+		<cfif stInfo.type neq "post">
+			<cfreturn {}>
+		</cfif>
+
+		<cfset publicID = getID(arguments.file)>
+		<cfset sigSignature = lcase( hash( "public_id=#publicID#&timestamp=#sigTimestamp##apiSecret#" ,"SHA" ) )>
+		
+		<!--- DELETE FROM CLOUDINARY --->
+		<cfhttp url="https://api.cloudinary.com/v1_1/#cloudName#/resources/image/upload?public_ids=#publicID#" method="DELETE" username="#apiKey#" password="#apiSecret#">
+		
+		<cfif isjson(stResponse.filecontent)>
+			<cfset stResult = deserializejson(stResponse.filecontent)>
+		</cfif>
+		
+		<cfif stResponse.StatusCode neq "200 Ok">
+			<cfif structkeyexists(stResult,"error")>
+				<!--- Cloudinary threw error, returned information --->
+				<cfthrow message="Error deleting from Cloudinary: #stResult.error.message#" detail="#stResponse.filecontent.toString()#">
+			<cfelse>
+				<!--- Cloudinary threw error, no information --->
+				<cfthrow message="Error deleting from Cloudinary" detail="#stResponse.filecontent.toString()#">
+			</cfif>
+		</cfif>
+		
+		<cfreturn stResult>
+	</cffunction>
+
+	<cffunction name="getInfo" access="public" output="false" returntype="struct">
+		<cfargument name="file" type="string" required="true">
+
+		<cfset var stResponse = structnew()>
+		<cfset var publicID = getID(arguments.file)>
+		<cfset var stResult = structnew()>
+		
+		<cfif not refindnocase("//res.cloudinary.com/", arguments.file)>
+			<cfthrow message="Source has not been migrated to Cloudinary">
+		</cfif>
+		
+		<cfhttp url="https://api.cloudinary.com/v1_1/#cloudName#/resources/image/upload/#publicID#" username="#apiKey#" password="#apiSecret#">
+		
+		<cfif isjson(stResponse.filecontent)>
+			<cfset stResult = deserializejson(stResponse.filecontent)>
+		</cfif>
+		
+		<cfif stResponse.StatusCode neq "200 Ok">
+			<cfif structkeyexists(stResult,"error")>
+				<!--- Cloudinary threw error, returned information --->
+				<cfthrow message="Error querying Cloudinary: #stResult.error.message#" detail="#stResponse.filecontent.toString()#">
+			<cfelse>
+				<!--- Cloudinary threw error, no information --->
+				<cfthrow message="Error querying Cloudinary" detail="#stResponse.filecontent.toString()#">
+			</cfif>
+		</cfif>
+		
+		<cfreturn stResult>
+	</cffunction>
 	
-}
+</cfcomponent>
