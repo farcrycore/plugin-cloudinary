@@ -164,15 +164,16 @@ component {
 	}
 
 	public struct function getURLInformation(required string file) {
+
 		var apiDomain = getAPIDomain();
 		var cloudName = getCloudName();
 		var uploadVia = application.fapi.getConfig("cloudinary", "uploadVia", "post");
 		var autoUploadFolder = application.fapi.getConfig("cloudinary", "autoUploadFolder", "/nothing___here");
-		
+
 		var apiURLPrefix = "//" & apiDomain & "/" & cloudName & "/image";
-		
+
 		var reAPI = "^//" & replace(apiDomain, '.', '\.', 'ALL') & "/" & replace(cloudName, '.', '\.', 'ALL') & "/image";
-		var reCDN = rereplace(rereplace(application.fc.lib.cdn.ioGetFileLocation(location="images", file="", bRetrieve=true, protocol="http").path, "([\.\?\+])", "\\1", "all"), "http:", "^(https?:)?");
+		var reCDN = reReplace(replaceList(application.fc.lib.cdn.ioGetFileLocation(location="images", file="", bRetrieve=true, protocol="http").path, ".,?,+", "\.,\?,\+"), "http:", "^(https?:)?");
 		var reFetch = reAPI & "/fetch(?:/([^/]+))?/(http.*)$";
 		var reAuto = reAPI & "/upload(?:/([^/]+))?" & autoUploadFolder & "(/.*)$";
 		var rePost = reAPI & "/upload(?:/([^/]+))?(/[^/\?]+)(\?.*|$)";
