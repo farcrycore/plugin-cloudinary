@@ -231,7 +231,20 @@ component {
 
 		else if (refind(reCDN, arguments.file)) {
 			stResult["source"] = rereplace(arguments.file, reCDN, "/");
+			if (uploadVia eq "fetch"){
+				stResult["type"] = "fetch";
+				stResult["untransformed"] = apiURLPrefix & "/fetch/" & urlEncodedFormat(arguments.file);
+				stResult["template"] = rereplace(stResult.untransformed, "/fetch/", "/fetch/{transformation}/");
+			}
+			else if (uploadVia eq "auto"){
+				stResult["type"] = "auto";
+				stResult["untransformed"] = apiURLPrefix & "/upload" & stResult.source;
+				stResult["template"] = rereplace(stResult.untransformed, "/upload/", "/upload/{transformation}/");
+			}
+		}
 
+		else {
+			stResult["source"] = arguments.file;
 			if (uploadVia eq "fetch"){
 				stResult["type"] = "fetch";
 				stResult["untransformed"] = apiURLPrefix & "/fetch/" & urlEncodedFormat(application.fc.lib.cdn.ioGetFileLocation(location="images", file=arguments.file, bReceive=true, protocol="http").path);
