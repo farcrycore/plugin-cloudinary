@@ -386,7 +386,7 @@
 		<cfset sigSignature = lcase( hash( "public_id=#publicID#&timestamp=#sigTimestamp##apiSecret#" ,"SHA" ) )>
 		
 		<!--- DELETE FROM CLOUDINARY --->
-		<cfhttp url="https://api.cloudinary.com/v1_1/#cloudName#/resources/image/upload?public_ids=#publicID#" method="DELETE" username="#apiKey#" password="#apiSecret#">
+		<cfhttp url="https://api.cloudinary.com/v1_1/#cloudName#/resources/image/upload?public_ids=#publicID#" method="DELETE" username="#apiKey#" password="#apiSecret#" result="stResponse">
 		
 		<cfif isjson(stResponse.filecontent)>
 			<cfset stResult = deserializejson(stResponse.filecontent)>
@@ -416,7 +416,7 @@
 			<cfthrow message="Source has not been migrated to Cloudinary">
 		</cfif>
 		
-		<cfhttp url="https://api.cloudinary.com/v1_1/#cloudName#/resources/image/upload/#publicID#" username="#apiKey#" password="#apiSecret#">
+		<cfhttp url="https://api.cloudinary.com/v1_1/#cloudName#/resources/image/upload/#publicID#" username="#apiKey#" password="#apiSecret#" result="stResponse">
 		
 		<cfif isjson(stResponse.filecontent)>
 			<cfset stResult = deserializejson(stResponse.filecontent)>
