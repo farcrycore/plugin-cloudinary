@@ -434,5 +434,26 @@
 		
 		<cfreturn stResult>
 	</cffunction>
-	
+
+	<cffunction name="fetch" output="false" returntype="string" hint="Return cloudinary url of cropped image.">
+		<cfargument name="sourceURL" required="true" type="string">
+		<cfargument name="cropParams" required="true" type="struct" hint="width,height,crop,format">
+
+		<cfset var stResult = structNew() />
+		<cfset var endpoint = getAPIEndpoint()>
+		<cfset var method = "image/fetch">
+		<cfset var transform = getTransform(argumentCollection=arguments.cropParams)>
+
+		<cfset var fetchURL = "#endpoint#/#method#/#transform#/">
+		<cfset var fileURL =arguments.sourceURL>
+
+		<cfif (len(fileURL) gt 2 && left(fileURL, 2) == "//")>
+			<cfset fileURL = "http:" & fileURL>
+		</cfif>
+
+		<cfset fileURL = fetchURL & urlEncode(fileURL)>
+
+		<cfreturn fileURL />
+	</cffunction>
+
 </cfcomponent>
