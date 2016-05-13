@@ -350,7 +350,10 @@
 		</cfif>
 		
 		<!--- Copy the source into the new field --->
-		<cfif len(sourcefilename) and refindnocase("//res.cloudinary.com/",sourcefilename)>
+		<cfif len(sourcefilename) and (application.fapi.getConfig("cloudinary", "uploadVia", "post") neq "post" or refindnocase("//res.cloudinary.com/",sourcefilename))>
+			<!--- source=xxx => original file for this image; _source=xxx => temporary variable used for dependant cuts --->
+			<cfset sourcefilename = replace(sourcefilename,"?source=","?_source=") />
+		<cfelseif len(sourcefilename) and refindnocase("//res.cloudinary.com/",sourcefilename)>
 			<!--- source=xxx => original file for this image; _source=xxx => temporary variable used for dependant cuts --->
 			<cfset sourcefilename = replace(sourcefilename,"?source=","?_source=") />
 		<cfelseif len(sourcefilename) and application.fc.lib.cdn.ioFileExists(location="images",file=sourcefilename)>
@@ -389,7 +392,7 @@
 		
 		<cfsetting requesttimeout="120" />
 		
-		<cfif len(arguments.source) and not refindnocase("//res.cloudinary.com/",arguments.source)>
+		<cfif len(arguments.source) and application.fapi.getConfig("cloudinary", "uploadVia", "post") eq "post" and not refindnocase("//res.cloudinary.com/",arguments.source)>
 			<cfreturn super.GenerateImage(argumentCollection=arguments) />
 		</cfif>
 		
@@ -418,7 +421,7 @@
 				<cfreturn application.fc.lib.cloudinary.upload(file=arguments.file, publicID=arguments.publicID, transformation=arguments.transformation).urlWithSource />
 			</cfcase>
 			<cfcase value="fetch">
-				<cfreturn application.fc.lib.cloudinary.fetch(file=arguments.file) />
+				<cfreturn application.fc.lib.cloudinary.fetch(file=arguments.file, cropParams={}) />
 			</cfcase>
 			<cfcase value="auto">
 				<cfreturn application.fc.lib.cloudinary.autoUpload(file=arguments.file) />

@@ -436,7 +436,7 @@
 	</cffunction>
 
 	<cffunction name="fetch" output="false" returntype="string" hint="Return cloudinary url of cropped image.">
-		<cfargument name="sourceURL" required="true" type="string">
+		<cfargument name="file" required="true" type="string">
 		<cfargument name="cropParams" required="true" type="struct" hint="width,height,crop,format">
 
 		<cfset var stResult = structNew() />
@@ -445,13 +445,19 @@
 		<cfset var transform = getTransform(argumentCollection=arguments.cropParams)>
 
 		<cfset var fetchURL = "#endpoint#/#method#/#transform#/">
-		<cfset var fileURL =arguments.sourceURL>
+		<cfset var fileURL =arguments.file>
 
-		<cfif (len(fileURL) gt 2 && left(fileURL, 2) == "//")>
-			<cfset fileURL = "http:" & fileURL>
+		<cfif (not structKeyExists(arguments.cropParams, "width") or arguments.cropParams.width eq 0)
+			AND (not structKeyExists(arguments.cropParams, "height") or arguments.cropParams.height eq 0)>
+			
+			<!--- Don't modify file --->
+		<cfelse>
+			<cfif (len(fileURL) gt 2 && left(fileURL, 2) == "//")>
+				<cfset fileURL = "http:" & fileURL>
+			</cfif>
+
+			<cfset fileURL = fetchURL & urlEncode(fileURL)>
 		</cfif>
-
-		<cfset fileURL = fetchURL & urlEncode(fileURL)>
 
 		<cfreturn fileURL />
 	</cffunction>
