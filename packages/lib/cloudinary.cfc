@@ -25,9 +25,25 @@
 
 	public string function getTransform(numeric width=0, numeric height=0, string crop="FitInside", string format=""){
 		
-		var transform = "fl_keep_iptc";
+		var transform = "";
 		var pixels = "";
-		
+
+		if (arguments.format == "" && application.fapi.getConfig("cloudinary", "formatAuto", 1) == 1) {
+			// enable automatic file format conversion
+			arguments.format = "auto";
+		}
+
+		if (application.fapi.getConfig("cloudinary", "qualityAuto", 1) == 1) {
+			// enable automatic image quality
+			transform = listappend(transform, "q_auto");
+		}
+		else {
+			if (application.fapi.getConfig("cloudinary", "keepIPTC", 0) == 1) {
+				// retain IPTC metadata only if auto image quality is NOT used
+				transform = listappend(transform, "fl_keep_iptc");
+			}
+		}
+
 		switch (lcase(arguments.crop)){
 			case "forcesize":
 				// Simply force the resize of the image into the width/height provided
@@ -159,6 +175,7 @@
 				break;
 			case "auto":
 				transform = listappend(transform, "f_auto");
+				break;
 		}
 
 		return transform;

@@ -18,5 +18,21 @@
 				name="autoUploadFolder" type="string"
 				ftHint="The auto upload folder for this appliation. Should start with '/'." />
 	
-	
+
+	<cfproperty ftSeq="10" ftFieldset="Options" ftLabel="Automatic Image File Format"
+				name="formatAuto" type="boolean" default="1" ftDefault="1"
+				ftType="boolean" ftRenderType="checkbox"
+				ftHint="Cloudinary will automatically select the best image format" />
+
+	<cfproperty ftSeq="11" ftFieldset="Options" ftLabel="Automatic Image Quality"
+				name="qualityAuto" type="boolean" default="1" ftDefault="1"
+				ftType="boolean" ftRenderType="checkbox"
+				ftHint="Cloudinary will automatically select the best image quality vs file size" />
+
+	<cfproperty ftSeq="12" ftFieldset="Options" ftLabel="Keep IPTC Metadata"
+				name="keepIPTC" type="boolean" default="0" ftDefault="0"
+				ftType="boolean" ftRenderType="checkbox"
+				ftHint="Cloudinary will retain IPTC Metadata. NOTE: This will NOT WORK if automatic image quality is selected above." />
+
+
 </cfcomponent>
