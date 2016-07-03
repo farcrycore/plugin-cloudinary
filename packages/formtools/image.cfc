@@ -470,7 +470,7 @@
 		<cfset var stInfo = application.fc.lib.cloudinary.getURLInformation(arguments.stObject[arguments.stMetadata.name]) />
 		<cfset var archiveFile = "" />
 		
-		<cfif len(stInfo.source) and application.fc.lib.cdn.ioFileExists(location="images",file=stInfo.source)>
+		<cfif refindnocase("\?source=", arguments.stObject[arguments.stMetadata.name]) AND len(stInfo.source) and application.fc.lib.cdn.ioFileExists(location="images",file=stInfo.source)>
 			<cfset archiveFile = "/#arguments.stObject.typename#/#arguments.archiveID#.#arguments.stMetadata.name#.#ListLast(stInfo.source,'.')#" />
 			
 			<cfset application.fc.lib.cdn.ioCopyFile(source_location="images",source_file=stInfo.source,dest_location="archive",dest_file=archiveFile) />
@@ -488,7 +488,7 @@
 		<cfset var stInfo = application.fc.lib.cloudinary.getURLInformation(arguments.stObject[arguments.stMetadata.name]) />
 		<cfset var archiveFile = "/#arguments.stObject.typename#/#arguments.archiveID#.#arguments.stMetadata.name#.#ListLast(arguments.stObject[arguments.stMetadata.name],'.')#" />
 		
-		<cfif len(stInfo.source) and application.fc.lib.cdn.ioFileExists(location="archive", file=archiveFile) and not application.fc.lib.cdn.ioFileExists(location="images", file=stInfo.source)>
+		<cfif refindnocase("\?source=", arguments.stObject[arguments.stMetadata.name]) AND len(stInfo.source) and application.fc.lib.cdn.ioFileExists(location="archive", file=archiveFile) and not application.fc.lib.cdn.ioFileExists(location="images", file=stInfo.source)>
 			<cfset application.fc.lib.cdn.ioMoveFile(source_location="archive",source_file=archiveFile,dest_location="images",dest_file=stInfo.source) />
 		</cfif>
 
