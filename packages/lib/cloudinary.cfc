@@ -300,7 +300,7 @@
 	}
 
 	
-	public string function fetch(required string file) {
+	/* public string function fetch(required string file) {
 		var endpoint = getAPIEndpoint();
 
 		// create a new Cloudinary URL
@@ -314,7 +314,7 @@
 		}
 
 		return "#endpoint#/image/fetch/#urlencodedformat(arguments.file)#";
-	}
+	} */
 
 	public string function autoUpload(required string file) {
 		var endpoint = getAPIEndpoint();
@@ -469,7 +469,7 @@
 			
 			<!--- Don't modify file --->
 		<cfelse>
-			<cfif (len(fileURL) gt 2 && left(fileURL, 2) == "//")>
+			<cfif (len(fileURL) gt 2 && left(fileURL, 2) eq "//")>
 				<cfset fileURL = "http:" & fileURL>
 			</cfif>
 
