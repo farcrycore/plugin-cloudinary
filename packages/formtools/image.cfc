@@ -266,7 +266,7 @@
 					<cfset application.fc.lib.cdn.ioMoveFile(source_location="archive",source_file=archivedFile,dest_location="images",dest_file=sourceFile) />
 					<cfset stResult = failed(value=arguments.existingfile,message="#arguments.localfile# is not within the file size limit of #round(arguments.sizeLimit/1048576)#MB") />
 				<cfelseif listlast(sourcefile,".") eq listlast(arguments.localfile,".")>
-					<cfset application.fc.lib.cdn.ioMoveFile(source_localpath=arguments.localfile,dest_location="images",dest_file=arguments.destination & "/" & uploadFilenName) />
+					<cfset application.fc.lib.cdn.ioMoveFile(source_localpath=arguments.localfile,dest_location="images",dest_file=arguments.destination & "/" & uploadFileName) />
 					
 					<!--- Copy to cloudinary --->
 					<cfset uploadFileName = "#arguments.destination#/#uploadFileName#" />
