@@ -473,7 +473,7 @@
 				<cfset fileURL = "http:" & fileURL>
 			</cfif>
 
-			<cfset fileURL = fetchURL & urlEncode(fileURL)>
+			<cfset fileURL = fetchURL & urlEncodedFormat(fileURL)>
 		</cfif>
 
 		<cfreturn fileURL />
