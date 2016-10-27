@@ -331,7 +331,7 @@
 		<cfargument name="publicID" type="string" required="true">
 		<cfargument name="transformation" type="string" required="true">
 
-		<cfset var sigTimestamp = DateDiff('s', CreateDate(1970,1,1), now())>
+		<cfset var sigTimestamp = DateDiff('s', dateconvert('utc2local', CreateDateTime(1970,1,1,0,0,0)), now())>
 		<cfset var sigSignature = "">
 		<cfset var stResult = structnew()>
 		<cfset var stResponse = structnew()>
@@ -371,7 +371,7 @@
 			<cfset stResult = deserializejson(stResponse.filecontent)>
 			<cfset stResult["urlWithSource"] = mid(stResult.url,6,len(stResult.url)) & "?source=#urlencodedformat(arguments.file)#">
 		</cfif>
-
+		
 		<cfreturn stResult>
 	</cffunction>
 
