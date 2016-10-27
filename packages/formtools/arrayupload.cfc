@@ -329,7 +329,11 @@
 						<cfelse>
 							<cfset stFile = application.formtools.image.oFactory.uploadToCloudinary(file=uploadFileName) />
 						</cfif>
-						<cfset uploadFileName = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(uploadFileName)#" />
+						<cfif isStruct(stFile)>
+							<cfset uploadFileName = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(uploadFileName)#" />
+						<cfelse>
+							<cfset uploadFileName = stFile />
+						</cfif>
 						
 						<cfset stResult = passed(uploadFileName) />
 						<cfset stResult.bChanged = true />
@@ -348,7 +352,11 @@
 						
 						<!--- Copy to Cloudinary --->
 						<cfset stFile = application.formtools.image.oFactory.uploadToCloudinary(uploadFileName) />
-						<cfset uploadFileName = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(uploadFileName)#" />
+						<cfif isStruct(stFile)>
+							<cfset uploadFileName = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(uploadFileName)#" />
+						<cfelse>
+							<cfset uploadFileName = stFile />
+						</cfif>
 						
 						<cfset stResult = passed(uploadFileName) />
 						<cfset stResult.bChanged = true />

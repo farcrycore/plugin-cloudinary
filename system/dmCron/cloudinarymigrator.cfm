@@ -85,7 +85,11 @@
 		<cfif application.fc.lib.cdn.ioFileExists(location="images",file=stObject[qWrong.property])>
 			<cfset cleanPublicID = reReplace(left(listfirst(listlast(stObject[qWrong.property],'/'),'.'), 64), "[^-a-zA-z0-9_.()\[\]]", "", "all") & "_" & application.fapi.getUUID()>
 			<cfset stFile = application.formtools.image.oFactory.uploadToCloudinary(file=stObject[qWrong.property], publicID=cleanPublicID) />
-			<cfset stObject[qWrong.property] = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(stObject[qWrong.property])#" />
+			<cfif isStruct(stFile)>
+				<cfset stObject[qWrong.property] = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(stObject[qWrong.property])#" />
+			<cfelse>
+				<cfset stObject[qWrong.property] = stFile />
+			</cfif>
 			
 			<cfset application.fapi.setData(stProperties=stObject) />
 			
