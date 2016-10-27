@@ -357,11 +357,6 @@
 			<cfhttpparam type="file" name="file" file="#application.fc.lib.cdn.ioReadFile(location='images',file=arguments.file,datatype='image').source#">
 		</cfhttp>
 		
-		<cfif isjson(stResponse.filecontent)>
-			<cfset stResult = deserializejson(stResponse.filecontent)>
-			<cfset stResult["urlWithSource"] = mid(stResult.url,6,len(stResult.url)) & "?source=#urlencodedformat(arguments.file)#">
-		</cfif>
-		
 		<cfif stResponse.StatusCode neq "200 Ok">
 			<cfif structkeyexists(stResult,"error")>
 				<!--- Cloudinary threw error, returned information --->
@@ -372,6 +367,11 @@
 			</cfif>
 		</cfif>
 		
+		<cfif isjson(stResponse.filecontent)>
+			<cfset stResult = deserializejson(stResponse.filecontent)>
+			<cfset stResult["urlWithSource"] = mid(stResult.url,6,len(stResult.url)) & "?source=#urlencodedformat(arguments.file)#">
+		</cfif>
+
 		<cfreturn stResult>
 	</cffunction>
 
