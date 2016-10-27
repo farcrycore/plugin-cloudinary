@@ -19,7 +19,7 @@
 		<cfif application.fc.lib.cdn.ioFileExists(location="images",file=stObj[url.copy_property])>
 			<cfset stFile = application.formtools.image.oFactory.uploadToCloudinary(file=stObj[url.copy_property]) />
 			<cfif isStruct(stFile)>
-			<cfset stObj[url.copy_property] = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(stObj[url.copy_property])#" />
+				<cfset stObj[url.copy_property] = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(stObj[url.copy_property])#" />
 			<cfelse>
 				<cfset stObj[url.copy_property] = stFile />
 			</cfif>
@@ -123,13 +123,13 @@
 						if (data.success){
 							$j("##file-"+(processingfile+1))
 								.removeClass("selected")
-								.find("input[name=files]").attr("checked",null).end()
+								.find("input[name=files]").prop("checked",null).end()
 								.find(".status").removeClass("status-not-applicable").removeClass("status-success").removeClass("status-failure").addClass("status-success").html("Done").attr("title","").end();
 						}
 						else{
 							$j("##file-"+(processingfile+1))
 								.removeClass("selected")
-								.find("input[name=files]").attr("checked",null).end()
+								.find("input[name=files]").prop("checked",null).end()
 								.find(".status").removeClass("status-not-applicable").removeClass("status-success").removeClass("status-failure").addClass("status-failure").html("Error").attr("title",data.error).end();
 						}
 						
