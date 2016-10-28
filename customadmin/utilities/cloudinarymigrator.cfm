@@ -17,16 +17,28 @@
 	
 	<cfif not findnocase("//res.cloudinary.com/",stObj[url.copy_property])>
 		<cfif application.fc.lib.cdn.ioFileExists(location="images",file=stObj[url.copy_property])>
-			<cfset stFile = application.formtools.image.oFactory.uploadToCloudinary(file=stObj[url.copy_property]) />
-			<cfif isStruct(stFile)>
-				<cfset stObj[url.copy_property] = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(stObj[url.copy_property])#" />
-			<cfelse>
-				<cfset stObj[url.copy_property] = stFile />
-			</cfif>
-			
-			<cfset application.fapi.setData(stProperties=stObj) />
-			
-			<cfset stResult["success"] = true />
+			<cftry>
+				<cfset stFile = application.formtools.image.oFactory.uploadToCloudinary(file=stObj[url.copy_property]) />
+				<cfif isStruct(stFile)>
+					<cfset stObj[url.copy_property] = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(stObj[url.copy_property])#" />
+				<cfelse>
+					<cfset stObj[url.copy_property] = stFile />
+				</cfif>
+				
+				<cfset application.fapi.setData(stProperties=stObj) />
+				
+				<cfset stResult["success"] = true />
+				<cfcatch>
+					<cfset stResult["success"] = false />
+					<cfset stResult["error"] = cfcatch.detail />
+					<cfif isJson(cfcatch.detail)>
+						<cfset detail = deserializeJSON(cfcatch.detail) />
+						<cfif isStruct(detail) && structKeyExists(detail, "error") && structKeyExists(detail.error, "message")>
+							<cfset stResult["error"] = detail.error.message />
+						</cfif>
+					</cfif>
+				</cfcatch>
+			</cftry>
 		<cfelse>
 			<cfset stResult["success"] = false />
 			<cfset stResult["error"] = "File does not exist" />
