@@ -194,7 +194,7 @@
 		var reCDN = reReplace(replaceList(application.fc.lib.cdn.ioGetFileLocation(location="images", file="", bRetrieve=true, protocol="http").path, ".,?,+", "\.,\?,\+"), "http:", "^(https?:)?");
 		var reFetch = reAPI & "/fetch(?:/([^/]+))?/(http.*)$";
 		var reAuto = reAPI & "/upload(?:/([^/]+))?" & autoUploadFolder & "(/.*)$";
-		var rePost = reAPI & "/upload(?:/([^/]+))?(/[^/\?]+)(\?.*|$)";
+		var rePost = reAPI & "/upload(?:/([^\?]+))?(/[^/\?]+)(\?.*|$)";
 
 		var stResult = {
 			"type" = "unknown",
