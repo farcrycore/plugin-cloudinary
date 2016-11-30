@@ -176,12 +176,15 @@
 				<!--- This means there is already a file associated with this object. The new file must have the same name. --->
 				<cftry>
 					<cfset uploadFileName = application.fc.lib.cdn.ioUploadFile(location="images",destination=sourceFile,nameconflict="makeunique",field=arguments.uploadfield,sizeLimit=arguments.sizeLimit) />
-					
+					<cfset var origUploadFileName = uploadFileName />
 					<!--- Copy to Cloudinary --->
 					<cfif refindnocase("//res.cloudinary.com/",arguments.existingfile)>
 						<cfset uploadFileName = uploadToCloudinary(file=uploadFileName,publicID=application.fc.lib.cloudinary.getID(arguments.existingfile)) />
 					<cfelse>
 						<cfset uploadFileName = uploadToCloudinary(file=uploadFileName) />
+					</cfif>
+					<cfif isStruct(uploadFileName)>
+						<cfset uploadFileName = mid(uploadFileName.url,6,len(uploadFileName.url)) & "?source=#urlencodedformat(origUploadFileName)#" />
 					</cfif>
 					
 					<cfset stResult = passed(uploadFileName) />
@@ -198,9 +201,12 @@
 				<!--- There is no image currently so we simply upload the image and make it unique  --->
 				<cftry>
 					<cfset uploadFileName = application.fc.lib.cdn.ioUploadFile(location="images",destination=arguments.destination,nameconflict="makeunique",acceptextensions=arguments.allowedExtensions,field=arguments.uploadfield,sizeLimit=arguments.sizeLimit) />
-					
+					<cfset var origUploadFileName = uploadFileName />
 					<!--- Copy to Cloudinary --->
 					<cfset uploadFileName = uploadToCloudinary(uploadFileName) />
+					<cfif isStruct(uploadFileName)>
+						<cfset uploadFileName = mid(uploadFileName.url,6,len(uploadFileName.url)) & "?source=#urlencodedformat(origUploadFileName)#" />
+					</cfif>
 					
 					<cfset stResult = passed(uploadFileName) />
 					<cfset stResult.bChanged = true />
@@ -260,14 +266,18 @@
 					<cfset application.fc.lib.cdn.ioMoveFile(source_location="archive",source_file=archivedFile,dest_location="images",dest_file=sourceFile) />
 					<cfset stResult = failed(value=arguments.existingfile,message="#arguments.localfile# is not within the file size limit of #round(arguments.sizeLimit/1048576)#MB") />
 				<cfelseif listlast(sourcefile,".") eq listlast(arguments.localfile,".")>
-					<cfset application.fc.lib.cdn.ioMoveFile(source_localpath=arguments.localfile,dest_location="images",dest_file=arguments.destination & "/" & uploadFilenName) />
+					<cfset application.fc.lib.cdn.ioMoveFile(source_localpath=arguments.localfile,dest_location="images",dest_file=arguments.destination & "/" & uploadFileName) />
 					
 					<!--- Copy to cloudinary --->
 					<cfset uploadFileName = "#arguments.destination#/#uploadFileName#" />
+					<cfset var origUploadFileName = uploadFileName />
 					<cfif refindnocase("//res.cloudinary.com/",arguments.existingfile)>
 						<cfset uploadFileName = uploadtocloudinary(uploadFileName,application.fc.lib.cloudinary.getID(arguments.existingFile)) />
 					<cfelse>
 						<cfset uploadFileName = uploadtocloudinary(uploadFileName) />
+					</cfif>
+					<cfif isStruct(uploadFileName)>
+						<cfset uploadFileName = mid(uploadFileName.url,6,len(uploadFileName.url)) & "?source=#urlencodedformat(origUploadFileName)#" />
 					</cfif>
 					
 					<cfset stResult = passed(uploadFileName) />
@@ -285,8 +295,11 @@
 					<cfset stResult = failed(value=arguments.existingfile,message="#arguments.localfile# is not within the file size limit of #round(arguments.sizeLimit/1048576)#MB") />
 				<cfelseif listFindNoCase(arguments.allowedExtensions,listlast(arguments.localfile,"."))>
 					<cfset uploadFileName = application.fc.lib.cdn.ioMoveFile(source_localpath=arguments.localfile,dest_location="images",dest_file=arguments.destination & "/" & getFileFromPath(arguments.localfile),nameconflict="makeunique") />
-					
+					<cfset var origUploadFileName = uploadFileName />
 					<cfset uploadFileName = uploadtocloudinary(uploadFileName) />
+					<cfif isStruct(uploadFileName)>
+						<cfset uploadFileName = mid(uploadFileName.url,6,len(uploadFileName.url)) & "?source=#urlencodedformat(origUploadFileName)#" />
+					</cfif>
 					
 					<cfset stResult = passed(uploadFileName) />
 					<cfset stResult.bChanged = true />
@@ -407,7 +420,7 @@
 	</cffunction>
 	
 	
-	<cffunction name="uploadToCloudinary" access="public" output="false" returntype="string" hint="Uploads specified image to Cloudinary and returns Cloudinary image path">
+	<cffunction name="uploadToCloudinary" access="public" output="false" returntype="any" hint="Uploads specified image to Cloudinary and returns Cloudinary image path">
 		<cfargument name="file" type="string" required="true" />
 		<cfargument name="publicID" type="string" required="false" default="#listfirst(listlast(arguments.file,'/'),'.')#_#application.fapi.getUUID()#" />
 		<cfargument name="transformation" type="string" required="false" default="" />

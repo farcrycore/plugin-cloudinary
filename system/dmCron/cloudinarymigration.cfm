@@ -68,7 +68,11 @@
 	<cfif not findnocase("//res.cloudinary.com/",stObject[qWrong.property])>
 		<cfif application.fc.lib.cdn.ioFileExists(location="images",file=stObject[qWrong.property])>
 			<cfset stFile = application.formtools.image.oFactory.uploadToCloudinary(file=stObject[qWrong.property]) />
-			<cfset stObject[qWrong.property] = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(stObject[qWrong.property])#" />
+			<cfif isStruct(stFile)>
+				<cfset stObject[qWrong.property] = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(stObject[qWrong.property])#" />
+			<cfelse>
+				<cfset stObject[qWrong.property] = stFile />
+			</cfif>
 			
 			<cfset application.fapi.setData(stProperties=stObject) />
 			

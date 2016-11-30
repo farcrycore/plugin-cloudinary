@@ -331,7 +331,7 @@
 		<cfargument name="publicID" type="string" required="true">
 		<cfargument name="transformation" type="string" required="true">
 
-		<cfset var sigTimestamp = DateDiff('s', CreateDate(1970,1,1), now())>
+		<cfset var sigTimestamp = DateDiff('s', dateconvert('utc2local', CreateDateTime(1970,1,1,0,0,0)), now())>
 		<cfset var sigSignature = "">
 		<cfset var stResult = structnew()>
 		<cfset var stResponse = structnew()>
@@ -357,11 +357,6 @@
 			<cfhttpparam type="file" name="file" file="#application.fc.lib.cdn.ioReadFile(location='images',file=arguments.file,datatype='image').source#">
 		</cfhttp>
 		
-		<cfif isjson(stResponse.filecontent)>
-			<cfset stResult = deserializejson(stResponse.filecontent)>
-			<cfset stResult["urlWithSource"] = mid(stResult.url,6,len(stResult.url)) & "?source=#urlencodedformat(arguments.file)#">
-		</cfif>
-		
 		<cfif stResponse.StatusCode neq "200 Ok">
 			<cfif structkeyexists(stResult,"error")>
 				<!--- Cloudinary threw error, returned information --->
@@ -370,6 +365,11 @@
 				<!--- Cloudinary threw error, no information --->
 				<cfthrow message="Error uploading to Cloudinary" detail="#stResponse.filecontent.toString()#">
 			</cfif>
+		</cfif>
+		
+		<cfif isjson(stResponse.filecontent)>
+			<cfset stResult = deserializejson(stResponse.filecontent)>
+			<cfset stResult["urlWithSource"] = mid(stResult.url,6,len(stResult.url)) & "?source=#urlencodedformat(arguments.file)#">
 		</cfif>
 		
 		<cfreturn stResult>
@@ -473,7 +473,7 @@
 				<cfset fileURL = "http:" & fileURL>
 			</cfif>
 
-			<cfset fileURL = fetchURL & urlEncode(fileURL)>
+			<cfset fileURL = fetchURL & urlEncodedFormat(fileURL)>
 		</cfif>
 
 		<cfreturn fileURL />

@@ -17,12 +17,28 @@
 	
 	<cfif not findnocase("//res.cloudinary.com/",stObj[url.copy_property])>
 		<cfif application.fc.lib.cdn.ioFileExists(location="images",file=stObj[url.copy_property])>
-			<cfset stFile = application.formtools.image.oFactory.uploadToCloudinary(file=stObj[url.copy_property]) />
-			<cfset stObj[url.copy_property] = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(stObj[url.copy_property])#" />
-			
-			<cfset application.fapi.setData(stProperties=stObj) />
-			
-			<cfset stResult["success"] = true />
+			<cftry>
+				<cfset stFile = application.formtools.image.oFactory.uploadToCloudinary(file=stObj[url.copy_property]) />
+				<cfif isStruct(stFile)>
+					<cfset stObj[url.copy_property] = mid(stFile.url,6,len(stFile.url)) & "?source=#urlencodedformat(stObj[url.copy_property])#" />
+				<cfelse>
+					<cfset stObj[url.copy_property] = stFile />
+				</cfif>
+				
+				<cfset application.fapi.setData(stProperties=stObj) />
+				
+				<cfset stResult["success"] = true />
+				<cfcatch>
+					<cfset stResult["success"] = false />
+					<cfset stResult["error"] = cfcatch.detail />
+					<cfif isJson(cfcatch.detail)>
+						<cfset detail = deserializeJSON(cfcatch.detail) />
+						<cfif isStruct(detail) && structKeyExists(detail, "error") && structKeyExists(detail.error, "message")>
+							<cfset stResult["error"] = detail.error.message />
+						</cfif>
+					</cfif>
+				</cfcatch>
+			</cftry>
 		<cfelse>
 			<cfset stResult["success"] = false />
 			<cfset stResult["error"] = "File does not exist" />
@@ -119,13 +135,13 @@
 						if (data.success){
 							$j("##file-"+(processingfile+1))
 								.removeClass("selected")
-								.find("input[name=files]").attr("checked",null).end()
+								.find("input[name=files]").prop("checked",null).end()
 								.find(".status").removeClass("status-not-applicable").removeClass("status-success").removeClass("status-failure").addClass("status-success").html("Done").attr("title","").end();
 						}
 						else{
 							$j("##file-"+(processingfile+1))
 								.removeClass("selected")
-								.find("input[name=files]").attr("checked",null).end()
+								.find("input[name=files]").prop("checked",null).end()
 								.find(".status").removeClass("status-not-applicable").removeClass("status-success").removeClass("status-failure").addClass("status-failure").html("Error").attr("title",data.error).end();
 						}
 						
@@ -141,9 +157,9 @@
 </cfoutput>
 <skin:onReady><cfoutput>
 	$j("##allfiles").click(function(){
-		var tr = $j("##files tbody input[name=files]").attr("checked",$j(this).attr("checked")==="checked"?"checked":null).parents("tr.file");
+		var tr = $j("##files tbody input[name=files]").prop("checked",$j(this).prop("checked")?"checked":null).parents("tr.file");
 		
-		if ($j(this).attr("checked")==="checked")
+		if ($j(this).prop("checked"))
 			tr.addClass("selected");
 		else
 			tr.removeClass("selected")
@@ -152,9 +168,9 @@
 		var target = $j(event.target), input = $j("input[name=files]",this), self = $j(this);
 		
 		if (!target.is("input"))
-			input.attr("checked",input.attr("checked")==="checked"?null:"checked");
+			input.prop("checked",input.prop("checked")?null:"checked");
 		
-		if (input.attr("checked") === "checked")
+		if (input.prop("checked"))
 			self.addClass("selected");
 		else
 			self.removeClass("selected");
