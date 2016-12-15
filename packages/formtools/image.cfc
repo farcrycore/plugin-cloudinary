@@ -634,7 +634,7 @@
 		
 		<cfif refindnocase("//res.cloudinary.com/.*\?source=",currentfilename)>
 			
-			<cfset newfilename = application.fc.lib.cdn.ioCopyFile(source_pathlocation="images",source_file=application.fc.lib.cloudinary.getSource(currentfilename),dest_location="images",nameconflict="makeunique",uniqueamong="images") />
+			<cfset newfilename = application.fc.lib.cdn.ioCopyFile(source_location="images",source_file=application.fc.lib.cloudinary.getSource(currentfilename),dest_location="images",nameconflict="makeunique",uniqueamong="images") />
 			<cfreturn rereplacenocase(currentfilename,"\?source=[^&]+","") & "?source=#urlencodedformat(newfilename)#" />
 			
 		<cfelseif refindnocase("//res.cloudinary.com/",currentfilename)>
@@ -649,7 +649,7 @@
 				<cfreturn "" />
 			</cfif>
 			
-			<cfreturn application.fc.lib.cdn.ioCopyFile(source_pathlocation="images",source_file=currentfilename,dest_location="images",dest_file=newfilename,nameconflict="makeunique",uniqueamong="images") />
+			<cfreturn application.fc.lib.cdn.ioCopyFile(source_location="images",source_file=currentfilename,dest_location="images",dest_file=newfilename,nameconflict="makeunique",uniqueamong="images") />
 		
 		</cfif>
 	</cffunction>
