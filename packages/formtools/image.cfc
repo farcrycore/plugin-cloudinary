@@ -566,56 +566,62 @@
 		<cfset var stImage = structnew() />
 		<cfset var stResult = structnew() />
 		
-		<cfif refindnocase("//res.cloudinary.com/.*\?source=",arguments.file) and application.fc.lib.cdn.ioFileExists(location='images',file=application.fc.lib.cloudinary.getSource(arguments.file))>
-			
-			<cfimage action="info" source="#application.fc.lib.cdn.ioReadFile(location='images',file=application.fc.lib.cloudinary.getSource(arguments.file),datatype='image')#" structName="stImage" />
-			
-			<cfset stResult["width"] = stImage.width />
-			<cfset stResult["height"] = stImage.height />
-			<cfset stResult["size"] = application.fc.lib.cdn.ioGetFileSize(location="images",file=application.fc.lib.cloudinary.getSource(arguments.file)) />
-			
-			<cfif arguments.admin>
-				<cfset stResult["path"] = application.fc.lib.cdn.ioGetFileLocation(location="images",file=application.fc.lib.cloudinary.getSource(arguments.file)).path />
-			<cfelse>
-				<cfset stResult["path"] = rereplacenocase(arguments.file,"\?_?source=[^&]+","") />
-			</cfif>
-			
-		<cfelseif refindnocase("//res.cloudinary.com/",arguments.file)>
-			
-			<cfhttp url="http:#rereplacenocase(arguments.file,'\?_?source=[^&]+','')#" getasbinary="yes" />
-
-			<cfif left(cfhttp.statusCode, 3) eq "200">
-				<cfimage action="info" source="#cfhttp.filecontent#" structName="stImage" />
-
+		<cftry>
+			<cfif refindnocase("//res.cloudinary.com/.*\?source=",arguments.file) and application.fc.lib.cdn.ioFileExists(location='images',file=application.fc.lib.cloudinary.getSource(arguments.file))>
+				
+				<cfimage action="info" source="#application.fc.lib.cdn.ioReadFile(location='images',file=application.fc.lib.cloudinary.getSource(arguments.file),datatype='image')#" structName="stImage" />
+				
 				<cfset stResult["width"] = stImage.width />
 				<cfset stResult["height"] = stImage.height />
-				<cfset stResult["size"] = len(cfhttp.filecontent) />
-				<cfset stResult["path"] = arguments.file />
+				<cfset stResult["size"] = application.fc.lib.cdn.ioGetFileSize(location="images",file=application.fc.lib.cloudinary.getSource(arguments.file)) />
+				
+				<cfif arguments.admin>
+					<cfset stResult["path"] = application.fc.lib.cdn.ioGetFileLocation(location="images",file=application.fc.lib.cloudinary.getSource(arguments.file)).path />
+				<cfelse>
+					<cfset stResult["path"] = rereplacenocase(arguments.file,"\?_?source=[^&]+","") />
+				</cfif>
+				
+			<cfelseif refindnocase("//res.cloudinary.com/",arguments.file)>
+				
+				<cfhttp url="http:#rereplacenocase(arguments.file,'\?_?source=[^&]+','')#" getasbinary="yes" />
 
+				<cfif left(cfhttp.statusCode, 3) eq "200">
+					<cfimage action="info" source="#cfhttp.filecontent#" structName="stImage" />
+
+					<cfset stResult["width"] = stImage.width />
+					<cfset stResult["height"] = stImage.height />
+					<cfset stResult["size"] = len(cfhttp.filecontent) />
+					<cfset stResult["path"] = arguments.file />
+
+				<cfelse>
+					<cfset stResult["width"] = 0 />
+					<cfset stResult["height"] = 0 />
+					<cfset stResult["size"] = 0 />
+					<cfset stResult["path"] = "" />
+				</cfif>
+				
+			<cfelseif application.fc.lib.cdn.ioFileExists(location="images",file=arguments.file)>
+			
+				<cfimage action="info" source="#application.fc.lib.cdn.ioReadFile(location='images',file=arguments.file,datatype='image')#" structName="stImage" />
+				
+				<cfset stResult["width"] = stImage.width />
+				<cfset stResult["height"] = stImage.height />
+				<cfset stResult["size"] = application.fc.lib.cdn.ioGetFileSize(location="images",file=arguments.file) />
+				<cfset stResult["path"] = application.fc.lib.cdn.ioGetFileLocation(location="images",file=arguments.file,admin=arguments.admin).path />
+				
 			<cfelse>
+				
 				<cfset stResult["width"] = 0 />
 				<cfset stResult["height"] = 0 />
 				<cfset stResult["size"] = 0 />
 				<cfset stResult["path"] = "" />
+				
 			</cfif>
-			
-		<cfelseif application.fc.lib.cdn.ioFileExists(location="images",file=arguments.file)>
-		
-			<cfimage action="info" source="#application.fc.lib.cdn.ioReadFile(location='images',file=arguments.file,datatype='image')#" structName="stImage" />
-			
-			<cfset stResult["width"] = stImage.width />
-			<cfset stResult["height"] = stImage.height />
-			<cfset stResult["size"] = application.fc.lib.cdn.ioGetFileSize(location="images",file=arguments.file) />
-			<cfset stResult["path"] = application.fc.lib.cdn.ioGetFileLocation(location="images",file=arguments.file,admin=arguments.admin).path />
-			
-		<cfelse>
-			
-			<cfset stResult["width"] = 0 />
-			<cfset stResult["height"] = 0 />
-			<cfset stResult["size"] = 0 />
-			<cfset stResult["path"] = "" />
-			
-		</cfif>
+
+			<cfcatch>
+				<cfset stResult = failed(value=arguments.file,message=cfcatch.message) />
+			</cfcatch>
+		</cftry>
 		
 		<cfreturn stResult />
 	</cffunction>
