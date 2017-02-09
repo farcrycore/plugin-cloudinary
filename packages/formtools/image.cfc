@@ -468,7 +468,7 @@
 				<cfif application.fc.lib.cdn.ioFileExists(location="images",file=source)>
 					<cfset application.fc.lib.cdn.ioDeleteFile(location="images",file=source) />
 				</cfif>
-			<cfelseif not refindnocase("//res.cloudinary.com/",arguments.stObject[arguments.stMetadata.name]) and application.fc.lib.cdn.ioFileExists(location="images",file="/#arguments.stObject[arguments.stMetadata.name]#")>
+			<cfelseif not refindnocase("//res.cloudinary.com/",arguments.stObject[arguments.stMetadata.name]) and application.fc.lib.cdn.ioFileExists(location="images",file="#arguments.stObject[arguments.stMetadata.name]#")>
 				<cfset application.fc.lib.cdn.ioDeleteFile(location="images",file="/#arguments.stObject[arguments.stMetadata.name]#") />
 			</cfif>
 		</cfif>
