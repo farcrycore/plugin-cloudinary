@@ -1,4 +1,4 @@
-<cfcomponent displayname="Cloudinary" hint="Cloudinary image hosting" extends="farcry.core.packages.forms.forms" output="false" persistent="false" key="cloudinary">
+<cfcomponent displayname="Cloudinary" hint="Cloudinary image hosting" extends="farcry.core.packages.forms.forms" output="false" persistent="false" key="cloudinary" fualias="cloudinary">
 
 	<cfproperty ftSeq="1" ftFieldset="Cloudinary" ftLabel="Cloud name"
 				name="cloudName" type="string" />
