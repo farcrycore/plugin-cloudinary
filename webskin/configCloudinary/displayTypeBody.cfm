@@ -6,8 +6,9 @@
 		for (typename in application.stCOAPI) {
 			stTable = {};
 			stTable['name'] = typename;
-			
-//			if ( ListContainsNoCase('types', application.stCOAPI[typename]['PACKAGE']) ) {
+			stTable['PACKAGE'] =  application.stCOAPI[typename]['PACKAGE'];
+	
+			if ( ! ListContainsNoCase('forms', application.stCOAPI[typename]['PACKAGE']) ) {
 				stProperties = application.stCOAPI[typename]['stProps'];
 		
 				stTable['properties'] = stProperties.Reduce(function(aReturn, key, stProperty){
@@ -21,6 +22,10 @@
 						else
 							stImage['path'] = '';
 		
+stImage['fttype'] = stProperty['METADATA']['fttype'];
+if (StructKeyExists(stProperty['METADATA'], 'ftLocation'))
+	stImage['ftLocation'] = stProperty['METADATA']['ftLocation'];		
+		
 						return aReturn.append(stImage);
 					}
 					else 
@@ -29,7 +34,7 @@
 		
 				if (stTable['properties'].len())
 					aResults.Append(stTable);
-//			} // types
+			} // packages
 		} // application.stCOAPI
 	
 	}
