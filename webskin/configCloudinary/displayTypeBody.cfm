@@ -12,7 +12,7 @@
 				stProperties = application.stCOAPI[typename]['stProps'];
 		
 				stTable['properties'] = stProperties.Reduce(function(aReturn, key, stProperty){
-					if ((StructKeyExists(stProperty['METADATA'], 'fttype') && ListContainsNoCase('image,s3upload', stProperty['METADATA']['fttype'])  ) || (StructKeyExists(stProperty['METADATA'], 'ftLocation') && ListContainsNoCase('images', stProperty['METADATA']['ftLocation']) )) {
+					if ( (StructKeyExists(stProperty['METADATA'], 'fttype') && ListContainsNoCase('image,s3upload', stProperty['METADATA']['fttype'])  ) || (StructKeyExists(stProperty['METADATA'], 'ftLocation') && ListContainsNoCase('images', stProperty['METADATA']['ftLocation']) )) {
 					
 						stImage = {};
 						stImage['name'] = key;
@@ -21,7 +21,7 @@
 							stImage['path'] = stProperty['METADATA']['ftDestination'];
 						else
 							stImage['path'] = '';
-		
+/*AJM: for debugging*/		
 stImage['fttype'] = stProperty['METADATA']['fttype'];
 if (StructKeyExists(stProperty['METADATA'], 'ftLocation'))
 	stImage['ftLocation'] = stProperty['METADATA']['ftLocation'];		
