@@ -1,4 +1,4 @@
-<!--- @@displayname: Cloudinary Migrator --->
+<!--- @@displayname: Cloudinary Migrator - RichText --->
 <!--- @@fuAlias: migrator-richtext --->
 <!--- @@cachestatus: -1 --->
 <!--- @@proxycachetimeout: -1 --->

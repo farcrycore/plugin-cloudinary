@@ -1,4 +1,4 @@
-<!--- @@displayname: Cloudinary Migrator --->
+<!--- @@displayname: Cloudinary Migrator - Images --->
 <!--- @@fuAlias: migrator --->
 <!--- @@cachestatus: -1 --->
 <!--- @@proxycachetimeout: -1 --->
