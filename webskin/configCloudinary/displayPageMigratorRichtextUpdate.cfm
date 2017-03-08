@@ -38,11 +38,9 @@ check  hash(objectid+typename+oldval+newval+cloudinarysecret)
 	
 	try {
 		REQUEST.mode.BADMIN = FALSE;
-		stReturn = {};
-		statusCode = 500;
+		stReturn = {};		
 		
-		
-		if ( cgi.request_method == 'GET') { // POST
+		if ( cgi.request_method == 'POST') { 
 			system            = createObject("java", "java.lang.System");
 			cloudinarysecret  = system.getEnv("CLOUDINARY_API_SECRET");
 			
@@ -51,9 +49,12 @@ check  hash(objectid+typename+oldval+newval+cloudinarysecret)
 // ALL GOOD - so far
 				if ( findRecord(FORM.objectid,FORM.typename) ) {
 					var stObj = application.fapi.getContentObject(FORM.objectid,FORM.typename);
+					
+					// full S3 URL
+					FORM.urlNew = application.fc.lib.cdn.ioGetFileLocation(location="images",file=FORM.urlNew).path;
 
 					var before = stObj[FORM.field];
-					stObj[FORM.field] = replace(stObj[FORM.field], FORM.urlOld, FORM.urlNew);
+					stObj[FORM.field] = replace(stObj[FORM.field], FORM.urlOld, FORM.urlNew, 'ALL');
 					var after = stObj[FORM.field];
 					
 					if (before != after) {
@@ -63,50 +64,50 @@ check  hash(objectid+typename+oldval+newval+cloudinarysecret)
 						var stUpdate = application.fapi.setData(objectid=FORM.objectid, typename=FORM.typename ,stProperties=stObj, auditNote=auditNote, bAudit=1);
 						
 						if (stUpdate.bSuccess) {
-							statusCode          = 200;
-							stReturn['message'] ="OK";
-							stReturn['detail']  = auditNote;
+							stReturn['statusCode'] = 200;
+							stReturn['message']    = "OK";
+							stReturn['detail']     = auditNote;
 						} else {
-							statusCode         = 500;
-							stReturn['error']  = stUpdate;
-							stReturn['detail'] = "TODO: better error handling required here";
+							stReturn['statusCode'] = 500;
+							stReturn['error']      = stUpdate;
+							stReturn['detail']     = "TODO: better error handling required here";
 						}
 					}
 					else {
-						statusCode          = 412;
-						stReturn['message'] = "Precondition Failed";
-						stReturn['detail']  = "No image links to update";
+						stReturn['statusCode'] = 412;
+						stReturn['message']    = "Precondition Failed";
+						stReturn['detail']     = "No image links to update";
 					}
 				}
 				else {
-					statusCode          = 404;
-					stReturn['message'] = "Not Found";
-					stReturn['detail']  = "No record in #FORM.typename# for objectID FORM.objectid";
+					stReturn['statusCode'] = 404;
+					stReturn['message']    = "Not Found";
+					stReturn['detail']     = "No record in #FORM.typename# for objectID FORM.objectid";
 				}
 			}
 			else {
-				statusCode          = 400;
-				stReturn['message'] = "Bad Request";
-				stReturn['detail']  = "Hash() failed";
+				stReturn['statusCode'] = 400;
+				stReturn['message']    = "Bad Request";
+				stReturn['detail']     = "Hash() failed";
 //stReturn.hash = hash(FORM.objectid&FORM.typename&FORM.field&FORM.urlOld&FORM.urlNew&cloudinarysecret);
 			}
 		} 
 		else {
-			statusCode          = 405;
-			stReturn['message'] ="Method Not Allowed";
-			stReturn['detail']  = "";
+			stReturn['statusCode'] = 405;
+			stReturn['message']    ="Method Not Allowed";
+			stReturn['detail']     = "";
 		}
 		
 	
 	}
 	catch (any error) {
-		statusCode     = 500;
-		stReturn['message'] = error.message;
-		stReturn['detail']  = error.detail;
+		stReturn['statusCode'] = 500;
+		stReturn['message']    = error.message;
+		stReturn['detail']     = error.detail;
 	}
 
 	content reset="true" type="application/json";
-	header statuscode="#statusCode#";
+	header statuscode="#stReturn['statusCode']#";
 	WriteOutput(serializeJSON(stReturn));
 </cfscript>
 <!--- 
