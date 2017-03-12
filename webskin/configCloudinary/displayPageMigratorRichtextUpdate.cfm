@@ -68,8 +68,10 @@ check  hash(objectid+typename+oldval+newval+cloudinarysecret)
 						stObj['DATETIMELASTUPDATED'] = Now();
 						stObj['LASTUPDATEDBY']       = 'Cloudinary Migrator';
 						
-						// remove any ?_source= tat may have been inserted by Farcry 
-					    // maybe best not to stObj[FORM.field] = ReReplaceNoCase(stObj[FORM.field], '\?{_}(0,1)source=.*?#ListLast(FORM.urlNew, '.')#', '', 'ALL');
+						// remove any ?_source= htat may have been inserted by Farcry 
+					    // maybe best not to - to aggressive
+					    // now searches / repaces both links
+					    // stObj[FORM.field] = ReReplaceNoCase(stObj[FORM.field], '\?{_}(0,1)source=.*?#ListLast(FORM.urlNew, '.')#', '', 'ALL');
 						
 						var auditNote = "Cloudinary Migrator: update image from '#FORM.urlOld#' to '# FORM.urlNew#'";
 						var stUpdate = application.fapi.setData(objectid=FORM.objectid, typename=FORM.typename ,stProperties=stObj, auditNote=auditNote, bAudit=1);
@@ -127,4 +129,3 @@ check  hash(objectid+typename+oldval+newval+cloudinarysecret)
 	header statuscode="#stReturn['statusCode']#";
 	WriteOutput(serializeJSON(stReturn));
 </cfscript>
-
