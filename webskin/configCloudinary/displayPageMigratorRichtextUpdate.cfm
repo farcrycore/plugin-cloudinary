@@ -40,8 +40,7 @@ check  hash(objectid+typename+oldval+newval+cloudinarysecret)
 		stReturn = {};		
 		
 		if ( cgi.request_method == 'POST') { 
-			system            = createObject("java", "java.lang.System");
-			cloudinarysecret  = system.getEnv("CLOUDINARY_API_SECRET");
+			cloudinarysecret  = application.fapi.getConfig("cloudinary", "apiSecret", "");
 			
 			//test hash and no fields are blank
 			if ( FORM.objectid != '' && FORM.typename != '' && FORM.field != '' && FORM.urlOld != '' && FORM.urlNew != '' && FORM.hash == hash(FORM.objectid&FORM.typename&FORM.field&FORM.urlOld&FORM.urlNew&cloudinarysecret)) {
