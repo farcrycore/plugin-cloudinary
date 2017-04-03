@@ -55,5 +55,5 @@ if (StructKeyExists(stProperty['METADATA'], 'ftLocation'))
 
 	content reset="true" type="application/json";
 	header statuscode="#statusCode#";
-	WriteOutput(serializeJSON(aResults));
+	application.fapi.stream(content=aResults, type="json");
 </cfscript>

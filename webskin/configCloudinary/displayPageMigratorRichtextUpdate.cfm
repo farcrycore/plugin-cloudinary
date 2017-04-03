@@ -138,5 +138,5 @@ check  hash(objectid+typename+oldval+newval+cloudinarysecret)
 
 	content reset="true" type="application/json";
 	header statuscode="#stReturn['statusCode']#";
-	WriteOutput(serializeJSON(stReturn));
+	application.fapi.stream(content=stReturn, type="json");
 </cfscript>
