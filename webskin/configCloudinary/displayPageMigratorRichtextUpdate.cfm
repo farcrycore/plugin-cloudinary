@@ -73,20 +73,31 @@ check  hash(objectid+typename+oldval+newval+cloudinarysecret)
 					    // stObj[FORM.field] = ReReplaceNoCase(stObj[FORM.field], '\?{_}(0,1)source=.*?#ListLast(FORM.urlNew, '.')#', '', 'ALL');
 						
 						var auditNote = "Cloudinary Migrator: update image from '#FORM.urlOld#' to '# FORM.urlNew#'";
-						var stUpdate = application.fapi.setData(objectid=FORM.objectid, typename=FORM.typename ,stProperties=stObj, auditNote=auditNote, bAudit=1);
-						
-						
-						if (stUpdate.bSuccess) {
-							// TODO: This might not actually be needed 
-							application.fc.lib.objectbroker.RemoveFromObjectBroker(lobjectids=FORM.objectid, typename=FORM.typename);
+						try {
+							var stUpdate = application.fapi.setData(objectid=FORM.objectid, typename=FORM.typename ,stProperties=stObj, auditNote=auditNote, bAudit=1);
 							
-							stReturn['statusCode'] = 200;
-							stReturn['message']    = "OK";
-							stReturn['detail']     = "#auditNote# for #FORM.objectid# in #FORM.typename#.#FORM.field#";
-						} else {
-							stReturn['statusCode'] = 500;
-							stReturn['error']      = stUpdate;
-							stReturn['detail']     = "TODO: better error handling required here";
+							
+							if (stUpdate.bSuccess) {
+								// TODO: This might not actually be needed 
+								application.fc.lib.objectbroker.RemoveFromObjectBroker(lobjectids=FORM.objectid, typename=FORM.typename);
+								
+								stReturn['statusCode'] = 200;
+								stReturn['message']    = "OK";
+								stReturn['detail']     = "#auditNote# for #FORM.objectid# in #FORM.typename#.#FORM.field#";
+							} else {
+								stReturn['statusCode'] = 500;
+								stReturn['error']      = stUpdate;
+								stReturn['stUpdate']   = stUpdate;
+								stReturn['detail']     = "#auditNote# for #FORM.objectid# in #FORM.typename#.#FORM.field#";
+							}
+						}
+						catch (any error) {
+							stReturn['statusCode']   = 503;
+							stReturn['error']        = error;
+							stReturn['stProperties'] = stObj;
+							stReturn['detail']       = error.detail;
+							stReturn['message']      = error.message;
+							stReturn['extendedinfo'] = "application.fapi.setData(objectid=#FORM.objectid#, typename=#FORM.typename# ,stProperties=stObj, auditNote=auditNote, bAudit=1)";
 						}
 					}
 					else {

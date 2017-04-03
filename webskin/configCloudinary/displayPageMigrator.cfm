@@ -15,7 +15,7 @@
 			stTable['name'] = typename;
 			stTable['PACKAGE'] =  application.stCOAPI[typename]['PACKAGE'];	
 
-			if ( ! ListContainsNoCase('forms', application.stCOAPI[typename]['PACKAGE']) ) {
+			if ( ! ListContainsNoCase('forms', application.stCOAPI[typename]['PACKAGE'])) {
 				stProperties = application.stCOAPI[typename]['stProps'];
 
 				stTable['checkStatus'] = StructKeyExists(stProperties, 'status');		
