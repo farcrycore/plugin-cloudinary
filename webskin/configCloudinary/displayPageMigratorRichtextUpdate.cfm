@@ -36,6 +36,7 @@ check  hash(objectid+typename+oldval+newval+cloudinarysecret)
 	}
 	
 	try {
+		request.mode.ajax = true;
 		REQUEST.mode.BADMIN = FALSE;
 		stReturn = {};		
 		
