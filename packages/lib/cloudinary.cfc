@@ -86,7 +86,7 @@
 				break;
 	
 			case "pad":
-				transform = listappend(transform,"c_pad");
+				transform = listappend(transform,"c_pad,b_white");
 				
 				if (arguments.width gt 0){
 					transform = listappend(transform,"w_#arguments.width#");
@@ -473,7 +473,7 @@
 				<cfset fileURL = "http:" & fileURL>
 			</cfif>
 
-			<cfset fileURL = fetchURL & urlEncodedFormat(fileURL)>
+			<cfset fileURL = fetchURL & fileURL>
 		</cfif>
 
 		<cfreturn fileURL />
