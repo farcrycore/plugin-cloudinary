@@ -2,6 +2,7 @@
 <!--- @@fuAlias: report-richtext --->
 <!--- @@cachestatus: -1 --->
 <!--- @@proxycachetimeout: -1 --->
+<!--- @@Viewstack: any --->
 
 <h1>Look for Cloudinary Links in RichText properties</h1>
 
