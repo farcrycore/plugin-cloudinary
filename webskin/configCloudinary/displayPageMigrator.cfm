@@ -31,6 +31,8 @@
 						else
 							stImage['path'] = '';
 							
+						stImage['sourceImage'] = ! StructKeyExists(stProperty['METADATA'], 'ftSourceField'); // source or crop
+							
 /*AJM: for debugging*/		
 stImage['fttype'] = stProperty['METADATA']['fttype'];
 if (StructKeyExists(stProperty['METADATA'], 'ftLocation'))
