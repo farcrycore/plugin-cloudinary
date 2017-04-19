@@ -3,6 +3,10 @@
 <!--- @@cachestatus: -1 --->
 <!--- @@proxycachetimeout: -1 --->
 
+<cfparam name="URL.typename"    default="">
+<cfparam name="URL.property"   default="">
+<cfparam name="URL.sourceimage" default="">
+
 <cfscript>
 	try {
 		request.mode.ajax = true;
@@ -13,40 +17,49 @@
 
 		for (typename in application.stCOAPI) {
 			stTable = {};
-			stTable['name'] = typename;
-			stTable['PACKAGE'] =  application.stCOAPI[typename]['PACKAGE'];	
-
-			if ( ! ListContainsNoCase('forms', application.stCOAPI[typename]['PACKAGE'])) {
-				stProperties = application.stCOAPI[typename]['stProps'];
-
-				stTable['checkStatus'] = StructKeyExists(stProperties, 'status');		
-				stTable['properties'] = stProperties.Reduce(function(aReturn, key, stProperty){
-					if ( (StructKeyExists(stProperty['METADATA'], 'fttype') && ListContainsNoCase('image,s3upload', stProperty['METADATA']['fttype'])  ) || (StructKeyExists(stProperty['METADATA'], 'ftLocation') && ListContainsNoCase('images', stProperty['METADATA']['ftLocation']) )) {
-					
-						stImage = {};
-						stImage['name'] = key;
-		
-						if (StructKeyExists(stProperty['METADATA'], 'ftDestination'))
-							stImage['path'] = stProperty['METADATA']['ftDestination'];
-						else
-							stImage['path'] = '';
-							
-						stImage['sourceImage'] = ! StructKeyExists(stProperty['METADATA'], 'ftSourceField'); // source or crop
-							
-/*AJM: for debugging*/		
-stImage['fttype'] = stProperty['METADATA']['fttype'];
-if (StructKeyExists(stProperty['METADATA'], 'ftLocation'))
-	stImage['ftLocation'] = stProperty['METADATA']['ftLocation'];		
-		
-						return aReturn.append(stImage);
-					}
-					else 
-						return aReturn;
-				}, []);
-		
-				if (stTable['properties'].len())
-					aResults.Append(stTable);
-			} // packages
+			
+			if (URL.typename  == "" OR (URL.typename != "" AND URL.typename == typename )) 	{
+				stTable['name'] = typename;
+				stTable['PACKAGE'] =  application.stCOAPI[typename]['PACKAGE'];	
+	
+				if ( ! ListContainsNoCase('forms', application.stCOAPI[typename]['PACKAGE'])) {
+					stProperties = application.stCOAPI[typename]['stProps'];
+	
+					stTable['checkStatus'] = StructKeyExists(stProperties, 'status');		
+					stTable['properties'] = stProperties.Reduce(function(aReturn, key, stProperty) {
+						if ( (StructKeyExists(stProperty['METADATA'], 'fttype') && ListContainsNoCase('image,s3upload', stProperty['METADATA']['fttype'])  ) || (StructKeyExists(stProperty['METADATA'], 'ftLocation') && ListContainsNoCase('images', stProperty['METADATA']['ftLocation']) )) {
+							if ( (URL.property == "" OR (URL.property != "" AND URL.property == key)) AND (sourceimage == "" OR (URL.sourceimage != "" AND URL.sourceimage != StructKeyExists(stProperty['METADATA'], 'ftSourceField')))) {
+								stImage = {};
+								stImage['name'] = key;
+				
+								if (StructKeyExists(stProperty['METADATA'], 'ftDestination'))
+									stImage['path'] = stProperty['METADATA']['ftDestination'];
+								else
+									stImage['path'] = '';
+									
+								stImage['sourceImage'] = ! StructKeyExists(stProperty['METADATA'], 'ftSourceField'); // source or crop
+									
+		/*AJM: for debugging*/		
+		stImage['fttype'] = stProperty['METADATA']['fttype'];
+		if (StructKeyExists(stProperty['METADATA'], 'ftLocation'))
+			stImage['ftLocation'] = stProperty['METADATA']['ftLocation'];		
+				
+								return aReturn.append(stImage);
+							} 
+							else {
+								return aReturn;
+							} // URL.property
+						}
+						else {
+							return aReturn;
+						}
+						
+					}, []);
+			
+					if (stTable['properties'].len())
+						aResults.Append(stTable);
+				} // packages
+			} // URL.typename	
 		} // application.stCOAPI
 	
 	}
