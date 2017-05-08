@@ -8,7 +8,7 @@
 	typename="cmLog"
 	columnList="farcryTypename,FarcryFieldName,farcryObjectID,datetimecreated,datetimedatetimelastupdated"
 	sortableColumns="farcryTypename,FarcryFieldName,datetimecreated,datetimedatetimelastupdated"
-	lFilterFields="farcryTypename,FarcryFieldName,farcryObjectID"
+	lFilterFields="farcryTypename,FarcryFieldName,farcryObjectID,urlCloudinary,urlS3"
 	
 	sqlOrderBy="datetimelastupdated DESC" />
 
