@@ -37,7 +37,7 @@
 		
 		} 
 		catch (any error) {
-			dump(var=error, label="prcessor.getCloudinaryImages()", abort=true);
+			dump(var=error, label="processor.getCloudinaryImages()", abort=true);
 		}
 		
 		return stResults;
@@ -57,7 +57,7 @@
 			<cfquery datasource="#APPLICATION.dsn#" name="qryImage" maxrows="20">
 				select count(*) as cnt
 				from #stTypes.name#
-				where #stProperty.name# like '%res.cloudinary.com%'
+				where #stProperty.name# like '%res\.cloudinary\.com%'
 			</cfquery>
 			<cfset totalImageCount += qryImage.cnt>
 			<span  style="display: inline-block; width: 300px;">#stProperty.name#<br />#NumberFormat(qryImage.cnt, '999,999,999')#<br /></span>

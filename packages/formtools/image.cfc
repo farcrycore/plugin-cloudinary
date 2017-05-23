@@ -1,7 +1,7 @@
 <cfcomponent extends="farcry.core.packages.formtools.image" output="false" persistent="false">
 	
 	<cfproperty name="ftShowMetadata" type="boolean" default="false" hint="If this is set to false, the file size and dimensions of the current image are not displayed to the user" />
-	<cfproperty name="dbPrecision" type="string" default="640" />
+	<cfproperty name="dbPrecision" type="string" default="1000" />
 	
 	<cffunction name="edit" output="false" returntype="string">
 		<cfargument name="typename" required="true" type="string" hint="The name of the type that this field is part of.">

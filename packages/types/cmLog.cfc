@@ -1,4 +1,4 @@
-<cfcomponent displayname="Cloudinary Migrator Log" extends="farcry.core.packages.types.types" output="false" bObjectBroker="true">
+<cfcomponent displayname="Cloudinary Migrator Log" extends="farcry.core.packages.types.types" output="false" bObjectBroker="false">
 
 	<cfproperty 
 		name="farcryTypename" ftLabel="Farcry Type"
