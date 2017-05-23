@@ -376,7 +376,62 @@
 
 		<cfreturn passed(sourcefilename) />
 	</cffunction>
-	
+
+	<cffunction name="fixImage" access="public" output="false" returntype="struct" hint="Fixes an image's size, returns true if the image needed to be corrected and false otherwise">
+		<cfargument name="filename" type="string" required="true" hint="The image" />
+		<cfargument name="stMetadata" type="struct" required="true" hint="Property metadata" />
+		<cfargument name="resizeMethod" type="string" required="true" default="#arguments.stMetadata.ftAutoGenerateType#" hint="The resizing method to use to fix the size." />
+		<cfargument name="quality" type="string" required="true" default="#arguments.stMetadata.ftQuality#" hint="Quality setting to use for resizing" />
+		<cfargument name="bForceCrop" type="boolean" required="false" default="false" hint="Used to force the custom cropping" />
+
+		<cfset var stGeneratedImageArgs = structnew() />
+		<cfset var stGeneratedImage = structnew() />
+		<cfset var q = "" />
+
+		<cfparam name="arguments.stMetadata.ftCropPosition" default="center" />
+		<cfparam name="arguments.stMetadata.ftCustomEffectsObjName" default="imageEffects" />
+		<cfparam name="arguments.stMetadata.ftLCustomEffects" default="" />
+		<cfparam name="arguments.stMetadata.ftConvertImageToFormat" default="" />
+		<cfparam name="arguments.stMetadata.ftbSetAntialiasing" default="true" />
+		<cfparam name="arguments.stMetadata.ftInterpolation" default="blackman" />
+		<cfparam name="arguments.stMetadata.ftQuality" default="#arguments.quality#" />
+		<cfif not len(arguments.resizeMethod)><cfset arguments.resizeMethod = arguments.stMetadata.ftAutoGenerateType /></cfif>
+
+		<cfset stGeneratedImageArgs.Source = arguments.filename />
+		<cfset stGeneratedImageArgs.Destination = arguments.filename />
+
+		<cfif isNumeric(arguments.stMetadata.ftImageWidth)>
+			<cfset stGeneratedImageArgs.width = arguments.stMetadata.ftImageWidth />
+		<cfelse>
+			<cfset stGeneratedImageArgs.width = 0 />
+		</cfif>
+
+		<cfif isNumeric(arguments.stMetadata.ftImageHeight)>
+			<cfset stGeneratedImageArgs.Height = arguments.stMetadata.ftImageHeight />
+		<cfelse>
+			<cfset stGeneratedImageArgs.Height = 0 />
+		</cfif>
+
+		<cfset stGeneratedImageArgs.customEffectsObjName = arguments.stMetadata.ftCustomEffectsObjName />
+		<cfset stGeneratedImageArgs.lCustomEffects = arguments.stMetadata.ftLCustomEffects />
+		<cfset stGeneratedImageArgs.convertImageToFormat = arguments.stMetadata.ftConvertImageToFormat />
+		<cfset stGeneratedImageArgs.bSetAntialiasing = arguments.stMetadata.ftBSetAntialiasing />
+		<cfif not isValid("boolean", stGeneratedImageArgs.bSetAntialiasing)>
+			<cfset stGeneratedImageArgs.bSetAntialiasing = true />
+		</cfif>
+		<cfset stGeneratedImageArgs.interpolation = arguments.stMetadata.ftInterpolation />
+		<cfset stGeneratedImageArgs.quality = arguments.stMetadata.ftQuality />
+
+		<cfset stGeneratedImageArgs.bUploadOnly = false />
+		<cfset stGeneratedImageArgs.PadColor = arguments.stMetadata.ftPadColor />
+		<cfset stGeneratedImageArgs.ResizeMethod = arguments.resizeMethod />
+
+		<!--- image is too small - only generate image for specific methods --->
+		<cfset stGeneratedImage = GenerateImage(argumentCollection=stGeneratedImageArgs) />
+
+		<cfreturn passed(stGeneratedImage.filename) />
+	</cffunction>
+
 	<cffunction name="GenerateImage" access="public" output="false" returntype="struct">
 		<cfargument name="source" type="string" required="true" hint="The absolute path where the image that is being used to generate this new image is located." />
 		<cfargument name="destination" type="string" required="false" default="" hint="The absolute path where the image will be stored." />
