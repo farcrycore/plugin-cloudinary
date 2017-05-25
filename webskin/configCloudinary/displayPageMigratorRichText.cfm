@@ -46,5 +46,7 @@
 
 	content reset="true" type="application/json";
 	header statuscode="#statusCode#";
-	application.fapi.stream(content=aResults, type="json");
+	writeoutput(serializeJSON(aResults));
+	
+	// farcry 7application.fapi.stream(content=aResults, type="json");
 </cfscript>

@@ -138,5 +138,7 @@ check  hash(objectid+typename+oldval+newval+cloudinarysecret)
 
 	content reset="true" type="application/json";
 	header statuscode="#stReturn['statusCode']#";
-	application.fapi.stream(content=stReturn, type="json");
+	writeoutput(serializeJSON(aResults));
+	
+	// farcry 7application.fapi.stream(content=stReturn, type="json");
 </cfscript>
