@@ -21,7 +21,7 @@
 			if (URL.typename  == "" OR (URL.typename != "" AND URL.typename == typename )) 	{
 				stTable['name'] = typename;
 				stTable['PACKAGE'] =  application.stCOAPI[typename]['PACKAGE'];	
-	
+stTable['applicationname'] = APPLICATION.applicationname;
 				if ( ! ListContainsNoCase('forms', application.stCOAPI[typename]['PACKAGE'])) {
 					stProperties = application.stCOAPI[typename]['stProps'];
 	
