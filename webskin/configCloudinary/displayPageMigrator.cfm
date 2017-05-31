@@ -38,7 +38,11 @@
 									stImage['path'] = '';
 									
 								stImage['sourceImage'] = ! StructKeyExists(stProperty['METADATA'], 'ftSourceField'); // source or crop
-									
+								
+// adNews - yafAgency, yafBrand | bannerimage and bannersourceimage
+	if ( APPLICATION.applicationname == 'adnews' AND ListFindNoCase('yafAgency,yafBrand', typename) GT 0 AND ListFindNoCase('bannerimage,bannersourceimage', key) GT 0 )
+		stImage['sourceImage'] = true;
+				
 		/*AJM: for debugging*/		
 		stImage['fttype'] = stProperty['METADATA']['fttype'];
 		if (StructKeyExists(stProperty['METADATA'], 'ftLocation'))
