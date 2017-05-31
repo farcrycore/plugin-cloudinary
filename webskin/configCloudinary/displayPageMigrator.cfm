@@ -27,7 +27,13 @@ stTable['applicationname'] = APPLICATION.applicationname;
 	
 					stTable['checkStatus'] = StructKeyExists(stProperties, 'status');		
 					stTable['properties'] = stProperties.Reduce(function(aReturn, key, stProperty) {
+						
 						if ( (StructKeyExists(stProperty['METADATA'], 'fttype') && ListContainsNoCase('image,s3upload', stProperty['METADATA']['fttype'])  ) || (StructKeyExists(stProperty['METADATA'], 'ftLocation') && ListContainsNoCase('images', stProperty['METADATA']['ftLocation']) )) {
+							
+// adNews - yafAgency, yafBrand | bannerimage and bannersourceimage
+	if ( APPLICATION.applicationname == 'adnews' AND ListFindNoCase('yafAgency,yafBrand', typename) GT 0 AND ListFindNoCase('bannerimage,bannersourceimage', key) GT 0 )
+		StructDelete(stProperty['METADATA'], 'ftSourceField', false);
+							
 							if ( (URL.property == "" OR (URL.property != "" AND URL.property == key)) AND (sourceimage == "" OR (URL.sourceimage != "" AND URL.sourceimage != StructKeyExists(stProperty['METADATA'], 'ftSourceField')))) {
 								stImage = {};
 								stImage['name'] = key;
@@ -38,10 +44,7 @@ stTable['applicationname'] = APPLICATION.applicationname;
 									stImage['path'] = '';
 									
 								stImage['sourceImage'] = ! StructKeyExists(stProperty['METADATA'], 'ftSourceField'); // source or crop
-								
-// adNews - yafAgency, yafBrand | bannerimage and bannersourceimage
-	if ( APPLICATION.applicationname == 'adnews' AND ListFindNoCase('yafAgency,yafBrand', typename) GT 0 AND ListFindNoCase('bannerimage,bannersourceimage', key) GT 0 )
-		stImage['sourceImage'] = true;
+
 				
 		/*AJM: for debugging*/		
 		stImage['fttype'] = stProperty['METADATA']['fttype'];
