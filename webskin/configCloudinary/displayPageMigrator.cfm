@@ -21,15 +21,21 @@
 			if (URL.typename  == "" OR (URL.typename != "" AND URL.typename == typename )) 	{
 				stTable['name'] = typename;
 				stTable['PACKAGE'] =  application.stCOAPI[typename]['PACKAGE'];	
-	
+stTable['applicationname'] = APPLICATION.applicationname;
 				if ( ! ListContainsNoCase('forms', application.stCOAPI[typename]['PACKAGE'])) {
 					stProperties = application.stCOAPI[typename]['stProps'];
 	
 					stTable['checkStatus'] = StructKeyExists(stProperties, 'status');		
-					// check this is the case for Farcry 7 stTable['checkStatus'] = StructKeyExists(stProperties, 'status') && StructKeyExists(stProperties, 'versionid');		
 					stTable['properties'] = stProperties.Reduce(function(aReturn, key, stProperty) {
+						
 						if ( (StructKeyExists(stProperty['METADATA'], 'fttype') && ListContainsNoCase('image,s3upload', stProperty['METADATA']['fttype'])  ) || (StructKeyExists(stProperty['METADATA'], 'ftLocation') && ListContainsNoCase('images', stProperty['METADATA']['ftLocation']) )) {
-							if ( (URL.property == "" OR (URL.property != "" AND URL.property == key)) AND (URL.sourceimage == "" OR (URL.sourceimage != "" AND URL.sourceimage != StructKeyExists(stProperty['METADATA'], 'ftSourceField')))) {
+
+/*							
+// adNews - yafAgency, yafBrand | bannerimage and bannersourceimage
+	if ( APPLICATION.applicationname == 'adnews' AND ListFindNoCase('yafAgency,yafBrand', typename) GT 0 AND ListFindNoCase('bannerimage,bannersourceimage', key) GT 0 )
+		StructDelete(stProperty['METADATA'], 'ftSourceField', false);
+*/
+							if ( (URL.property == "" OR (URL.property != "" AND URL.property == key)) AND (sourceimage == "" OR (URL.sourceimage != "" AND URL.sourceimage != StructKeyExists(stProperty['METADATA'], 'ftSourceField')))) {
 								stImage = {};
 								stImage['name'] = key;
 				
@@ -39,7 +45,8 @@
 									stImage['path'] = '';
 									
 								stImage['sourceImage'] = ! StructKeyExists(stProperty['METADATA'], 'ftSourceField'); // source or crop
- 
+
+				
 		/*AJM: for debugging*/		
 		stImage['fttype'] = stProperty['METADATA']['fttype'];
 		if (StructKeyExists(stProperty['METADATA'], 'ftLocation'))
