@@ -9,7 +9,7 @@
 <cfset REQUEST.mode.BADMIN = FALSE>
 <cfset urlPlugin = "http://#cgi.http_host#/cloudinary/"> <!--- application.config.cloudinary. --->
 
-<cfparam name="URL.showStatuscode" default="FALSE">
+<cfparam name="URL.showStatuscode" default="FALSE"> <!--- remove URLs with statuscode from report --->
 <cfscript>
 		public struct function getCloudinaryImages() {
 		var stCloudinary = {};
