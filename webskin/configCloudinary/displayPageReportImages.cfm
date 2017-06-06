@@ -43,11 +43,8 @@
 		
 		return stResults;
 	}
-	
 
 </cfscript>
-
-
 
 <cfset stImages = getCloudinaryImages()>
 <cfset totalImageCount = 0>
@@ -77,8 +74,6 @@
 		</cfif>
 		</p>
 </cfoutput>
-
-
 
 <cffunction name="reFindNoCaseAll" output="true" returnType="struct">
    <cfargument name="regex" type="string" required="yes">
