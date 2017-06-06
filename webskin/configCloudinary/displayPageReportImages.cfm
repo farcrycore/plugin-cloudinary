@@ -9,6 +9,7 @@
 <cfset REQUEST.mode.BADMIN = FALSE>
 <cfset urlPlugin = "http://#cgi.http_host#/cloudinary/"> <!--- application.config.cloudinary. --->
 
+<cfparam name="URL.showStatuscode" default="FALSE">
 <cfscript>
 		public struct function getCloudinaryImages() {
 		var stCloudinary = {};
@@ -58,6 +59,7 @@
 				select count(*) as cnt
 				from #stTypes.name#
 				where #stProperty.name# like '%res\.cloudinary\.com%'
+				<cfif NOT URL.showStatuscode>  and #stProperty.name# not like '%statuscode=%'</cfif>
 			</cfquery>
 			<cfset totalImageCount += qryImage.cnt>
 			<span  style="display: inline-block; width: 300px;">#stProperty.name#<br />#NumberFormat(qryImage.cnt, '999,999,999')#<br /></span>
@@ -66,6 +68,14 @@
 	</cfloop>
 	
 	<h2>Total Images: #NumberFormat(totalImageCount, '999,999,999')#</h2>
+	
+	<p>
+		<cfif URL.showStatuscode>
+			<a href="report-image?showStatuscode=false">show without Status Code</a>
+		<cfelse>
+			<a href="report-image?showStatuscode=true">show with Status Code</a>
+		</cfif>
+		</p>
 </cfoutput>
 
 
