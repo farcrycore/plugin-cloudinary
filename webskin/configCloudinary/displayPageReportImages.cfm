@@ -10,7 +10,7 @@
 <cfset urlPlugin = "http://#cgi.http_host#/cloudinary/"> <!--- application.config.cloudinary. --->
 
 <cfparam name="URL.showStatuscode"  default="FALSE"> <!--- remove URLs with statuscode from report --->
-<cfparam name="URL.showFarcyStatus" default="FALSE"> <!--- remove Farcry Status != approved from report --->
+<cfparam name="URL.showFarcyStatus" default="TRUE">  <!--- show Farcry Status = approved in report --->
 <cfscript>
 		public struct function getCloudinaryImages() {
 		var stCloudinary = {};
@@ -58,8 +58,10 @@
 				from #stTypes.name#
 				where #stProperty.name# like '%res\.cloudinary\.com%'
 				<cfif NOT URL.showStatuscode>  and #stProperty.name# not like '%statuscode=%'</cfif>
-				<cfif stTypes.checkStatus AND  (NOT URL.showFarcyStatus)>  AND status = 'approved'</cfif>
+				<cfif stTypes.checkStatus AND  (URL.showFarcyStatus)>  AND status = 'approved'</cfif>
+
 			</cfquery>
+
 			<cfset totalImageCount += qryImage.cnt>
 			<span  style="display: inline-block; width: 300px;">#stProperty.name#<br />#NumberFormat(qryImage.cnt, '999,999,999')#<br /></span>
 		</cfloop>
@@ -78,9 +80,9 @@
 	
 	<p>
 	<cfif URL.showFarcyStatus>
-		<a href="report-image?showStatuscode=#URL.showFarcyStatus#&showFarcyStatus&false">show without Farcry Status</a>
+		<a href="report-image?showStatuscode=#URL.showFarcyStatus#&showFarcyStatus=false">show without Farcry Status = approved</a>
 	<cfelse>
-		<a href="report-image?showStatuscode=#URL.showFarcyStatus#&showFarcyStatus&true">show with Farcry Status</a>
+		<a href="report-image?showStatuscode=#URL.showFarcyStatus#&showFarcyStatus=true">show with Farcry Status = approved</a>
 	</cfif>
 	</p>
 </cfoutput>
