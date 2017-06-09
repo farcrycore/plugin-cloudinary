@@ -10,7 +10,7 @@
 <cfset urlPlugin = "http://#cgi.http_host#/cloudinary/"> <!--- application.config.cloudinary. --->
 
 <cfparam name="URL.showStatuscode"  default="FALSE"> <!--- remove URLs with statuscode from report --->
-<cfparam name="URL.showFarcyStatus" default="TRUE">  <!--- show Farcry Status = approved in report --->
+<!--- <cfparam name="URL.showFarcyStatus" default="TRUE"> --->  <!--- show Farcry Status = approved in report --->
 <cfscript>
 		public struct function getCloudinaryImages() {
 		var stCloudinary = {};
@@ -26,14 +26,14 @@
 				result="stCloudinary"
 				throwonerror="false" 
 			{};
-			
+	
 			if ( StructKeyexists(stCloudinary, 'status_code') && stCloudinary['status_code'] == '200') {
 				stResults.success           = true;
 				stResults.aCloudinaryImages = deserializeJSON(stCloudinary['filecontent']);
 			}
 			else {
 				stResults.success           = false;
-				stResults.aCloudinaryImages              = [];
+				stResults.aCloudinaryImages = [];
 				stResults.stResonse         = stCloudinary;
 			}
 		
@@ -58,7 +58,7 @@
 				from #stTypes.name#
 				where #stProperty.name# like '%res\.cloudinary\.com%'
 				<cfif NOT URL.showStatuscode>  and #stProperty.name# not like '%statuscode=%'</cfif>
-				<cfif stTypes.checkStatus AND  (URL.showFarcyStatus)>  AND status = 'approved'</cfif>
+				<!--- <cfif stTypes.checkStatus AND  (URL.showFarcyStatus)>  AND status = 'approved'</cfif> --->
 
 			</cfquery>
 
@@ -72,20 +72,21 @@
 	
 	<p>
 	<cfif URL.showStatuscode>
-		<a href="report-image?showStatuscode=false&showFarcyStatus=#URL.showFarcyStatus#">show without Status Code</a>
+		<a href="report-image?showStatuscode=false">show without Status Code</a> <!--- &showFarcyStatus=#URL.showFarcyStatus# --->
 	<cfelse>
-		<a href="report-image?showStatuscode=true&showFarcyStatus=#URL.showFarcyStatus#">show with Status Code</a>
+		<a href="report-image?showStatuscode=true">show with Status Code</a> <!--- &showFarcyStatus=#URL.showFarcyStatus# --->
 	</cfif>
 	</p>
 	
-	<p>
+	<!--- <p>
 	<cfif URL.showFarcyStatus>
 		<a href="report-image?showStatuscode=#URL.showFarcyStatus#&showFarcyStatus=false">show without Farcry Status = approved</a>
 	<cfelse>
 		<a href="report-image?showStatuscode=#URL.showFarcyStatus#&showFarcyStatus=true">show with Farcry Status = approved</a>
 	</cfif>
-	</p>
+	</p> --->
 </cfoutput>
+
 
 <cffunction name="reFindNoCaseAll" output="true" returnType="struct">
    <cfargument name="regex" type="string" required="yes">
