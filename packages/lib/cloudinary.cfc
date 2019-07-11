@@ -323,6 +323,25 @@
 		return "#endpoint#/image/upload/#autoUploadFolder##arguments.file#";
 	}	
 
+	public struct function getUsageReport() output=false {
+		var stResponse = structnew();
+		var aResources = [];
+		var stResults = {};
+		
+		var apiKey    =  application.fapi.getConfig("cloudinary", "apiKey", "");
+		var apiSecret =  application.fapi.getConfig("cloudinary", "apiSecret", "");
+		var cloudName =  application.fapi.getConfig("cloudinary", "cloudName", "");
+		
+		var urlSearch = "https://api.cloudinary.com/v1_1/#cloudName#/usage";
+		
+		cfhttp( url=urlSearch, password=apiSecret, timeout=10, result="stResponse", username=apiKey );
+		if ( isjson(stResponse.filecontent) ) {
+			stResults = deserializejson(stResponse.filecontent);
+
+		}
+		
+		return stResults;
+	}
 	</cfscript>
 
 

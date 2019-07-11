@@ -8,6 +8,7 @@
 				
 				<menuitem id="cloudinarymigratorlog" sequence="102" label="Cloudinary Migrator Log" link="/admin/customadmin.cfm?plugin=cloudinary&amp;module=utilities/cmLog.cfm" />
 				<!-- farcry 7 <menuitem id="cloudinarymigratorlog" sequence="102" label="Cloudinary Migrator Log" type="cmLog" /> -->
+				<menuitem id="cloudinaryusagereport" sequence="103" label="Cloudinary Usage Report" link="/admin/customadmin.cfm?plugin=cloudinary&amp;module=utilities/usageReport.cfm" />
 			</menu>
 		</subsection>
 	</section>
