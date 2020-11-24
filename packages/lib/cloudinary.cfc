@@ -481,15 +481,27 @@
 		<cfset var transform = getTransform(argumentCollection=arguments.cropParams)>
 
 		<cfset var fetchURL = "#endpoint#/#method#/#transform#/">
-		<cfset var fileURL =arguments.file>
+		<cfset var fileURL = arguments.file>
+
+		<cfif not reFindNoCase("^(https?:)?//", fileURL)>
+			<cfset fileURL = application.fc.lib.cdn.ioGetFileLocation(location="images", file=fileURL).path />
+		</cfif>
 
 		<cfif (not structKeyExists(arguments.cropParams, "width") or arguments.cropParams.width eq 0)
 			AND (not structKeyExists(arguments.cropParams, "height") or arguments.cropParams.height eq 0)>
-			
-			<!--- Don't modify file --->
+
+			<cfif application.fapi.getConfig("cloudinary", "qualityAutoUnsized", 1)>
+				<cfif (len(fileURL) gt 2 && left(fileURL, 2) eq "//")>
+					<cfset fileURL = "https:" & fileURL>
+				</cfif>
+
+				<cfset fileURL = "#endpoint#/#method#/q_auto/#fileURL#">
+			<cfelse>
+				<!--- Don't modify file --->
+			</cfif>
 		<cfelse>
 			<cfif (len(fileURL) gt 2 && left(fileURL, 2) eq "//")>
-				<cfset fileURL = "http:" & fileURL>
+				<cfset fileURL = "https:" & fileURL>
 			</cfif>
 
 			<cfset fileURL = fetchURL & fileURL>

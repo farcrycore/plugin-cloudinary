@@ -29,7 +29,12 @@
 				ftType="boolean" ftRenderType="checkbox"
 				ftHint="Cloudinary will automatically select the best image quality vs file size" />
 
-	<cfproperty ftSeq="12" ftFieldset="Options" ftLabel="Keep IPTC Metadata"
+	<cfproperty ftSeq="12" ftFieldset="Options" ftLabel="Apply Automatic Image Quality to Unsized Images"
+				name="qualityAutoUnsized" type="boolean" default="1" ftDefault="1"
+				ftType="boolean" ftRenderType="checkbox"
+				ftHint="Cloudinary will automatically select the best image quality vs file size for images that are not to be resized" />
+
+	<cfproperty ftSeq="13" ftFieldset="Options" ftLabel="Keep IPTC Metadata"
 				name="keepIPTC" type="boolean" default="0" ftDefault="0"
 				ftType="boolean" ftRenderType="checkbox"
 				ftHint="Cloudinary will retain IPTC Metadata. NOTE: This will NOT WORK if automatic image quality is selected above." />
