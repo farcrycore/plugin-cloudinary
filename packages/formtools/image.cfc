@@ -414,7 +414,8 @@
 			width = arguments.width, 
 			height = arguments.height, 
 			crop = arguments.resizeMethod,
-			format = arguments.convertImageToFormat
+			format = arguments.convertImageToFormat,
+			lCustomEffects = arguments.lCustomEffects
 		}) />
 		
 		<cfreturn stResult />

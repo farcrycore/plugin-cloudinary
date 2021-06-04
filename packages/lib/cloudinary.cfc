@@ -23,7 +23,7 @@
 		return cloudName;
 	}
 
-	public string function getTransform(numeric width=0, numeric height=0, string crop="FitInside", string format=""){
+	public string function getTransform(numeric width=0, numeric height=0, string crop="FitInside", string format="", string lCustomEffects=""){
 		
 		var transform = "";
 		var pixels = "";
@@ -167,6 +167,12 @@
 						transform = listappend(transform,"h_#arguments.height#");
 					}
 				}
+		}
+
+		if (listFindNoCase(arguments.lCustomEffects, 'circular')) {
+
+			transform = listappend(transform,"r_max");
+
 		}
 		
 		switch (arguments.format){
