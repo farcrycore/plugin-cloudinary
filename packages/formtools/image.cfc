@@ -1,6 +1,6 @@
 <cfcomponent extends="farcry.core.packages.formtools.image" output="false" persistent="false">
 	
-	<cfproperty name="ftShowMetadata" type="boolean" default="false" hint="If this is set to false, the file size and dimensions of the current image are not displayed to the user" />
+	<cfproperty name="ftShowMetadata" type="boolean" default="true" hint="If this is set to false, the file size and dimensions of the current image are not displayed to the user" />
 	
 	<cfproperty name="dbPrecision" type="string" default="1000" />
 	
@@ -10,6 +10,7 @@
 		<cfargument name="stMetadata" required="true" type="struct" hint="This is the metadata that is either setup as part of the type.cfc or overridden when calling ft:object by using the stMetadata argument.">
 		<cfargument name="fieldname" required="true" type="string" hint="This is the name that will be used for the form field. It includes the prefix that will be used by ft:processform.">
 
+		<cfset arguments.stMetadata.ftShowMetadata = true>
 		<cfset var html = super.edit(argumentCollection=arguments) />
 
 		<cfreturn rereplace(html, '<span class="image-filename">http%3A%2F%2F[^<]+%2F([^<]+)%2E(\w+)</span>', '<span class="image-filename">\1.\2</span>') />
