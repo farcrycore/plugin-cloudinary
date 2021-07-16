@@ -405,7 +405,7 @@
 		<cfset stResult.message = "" />
 		<cfset stResult.filename = "" />
 		
-		<cfsetting requesttimeout="120" />
+		<cfsetting requesttimeout="10000" />
 		
 		<cfif len(arguments.source) and application.fapi.getConfig("cloudinary", "uploadVia", "post") eq "post" and not refindnocase("//res.cloudinary.com/",arguments.source)>
 			<cfreturn super.GenerateImage(argumentCollection=arguments) />
