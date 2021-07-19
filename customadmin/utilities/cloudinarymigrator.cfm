@@ -5,8 +5,7 @@
 <cfimport taglib="/farcry/core/tags/formtools" prefix="ft" />
 <cfimport taglib="/farcry/core/tags/webskin" prefix="skin" />
 
-
-<cfif isdefined("url.copy_typename") and isdefined("url.copy_property")>
+<cfif isdefined("url.copy_typename") and isdefined("url.copy_property") and isdefined("url.copy_objectid") and isValid("uuid", url.copy_objectid)>
 	<cfset stResult = structnew() />
 	<cfset stResult["typename"] = url.copy_typename />
 	<cfset stResult["objectid"] = url.copy_objectid />
