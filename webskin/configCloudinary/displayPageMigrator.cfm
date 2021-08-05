@@ -35,7 +35,26 @@ stTable['applicationname'] = APPLICATION.applicationname;
 	if ( APPLICATION.applicationname == 'adnews' AND ListFindNoCase('yafAgency,yafBrand', typename) GT 0 AND ListFindNoCase('bannerimage,bannersourceimage', key) GT 0 )
 		StructDelete(stProperty['METADATA'], 'ftSourceField', false);
 */
-							if ( (URL.property == "" OR (URL.property != "" AND URL.property == key)) AND (sourceimage == "" OR (URL.sourceimage != "" AND URL.sourceimage != StructKeyExists(stProperty['METADATA'], 'ftSourceField')))) {
+							if (listLen(URL.property) gt 1 AND listFindNoCase(URL.property, key)) {
+
+								stImage = {};
+								stImage['name'] = key;
+				
+								if (StructKeyExists(stProperty['METADATA'], 'ftDestination'))
+									stImage['path'] = stProperty['METADATA']['ftDestination'];
+								else
+									stImage['path'] = '';
+									
+								stImage['sourceImage'] = ! StructKeyExists(stProperty['METADATA'], 'ftSourceField'); // source or crop
+				
+								/*AJM: for debugging*/		
+								stImage['fttype'] = stProperty['METADATA']['fttype'];
+								if (StructKeyExists(stProperty['METADATA'], 'ftLocation'))
+									stImage['ftLocation'] = stProperty['METADATA']['ftLocation'];
+
+								return aReturn.append(stImage);
+
+							} else if ( (URL.property == "" OR (URL.property != "" AND URL.property == key)) AND (sourceimage == "" OR (URL.sourceimage != "" AND URL.sourceimage != StructKeyExists(stProperty['METADATA'], 'ftSourceField')))) {
 								stImage = {};
 								stImage['name'] = key;
 				
@@ -47,12 +66,13 @@ stTable['applicationname'] = APPLICATION.applicationname;
 								stImage['sourceImage'] = ! StructKeyExists(stProperty['METADATA'], 'ftSourceField'); // source or crop
 
 				
-		/*AJM: for debugging*/		
-		stImage['fttype'] = stProperty['METADATA']['fttype'];
-		if (StructKeyExists(stProperty['METADATA'], 'ftLocation'))
-			stImage['ftLocation'] = stProperty['METADATA']['ftLocation'];		
+								/*AJM: for debugging*/		
+								stImage['fttype'] = stProperty['METADATA']['fttype'];
+								if (StructKeyExists(stProperty['METADATA'], 'ftLocation'))
+									stImage['ftLocation'] = stProperty['METADATA']['ftLocation'];		
 				
 								return aReturn.append(stImage);
+
 							} 
 							else {
 								return aReturn;
@@ -66,10 +86,11 @@ stTable['applicationname'] = APPLICATION.applicationname;
 			
 					if (stTable['properties'].len())
 						aResults.Append(stTable);
+				
 				} // packages
 			} // URL.typename	
 		} // application.stCOAPI
-	
+
 	}
 	catch (any error) {
 		statusCode = 500;
