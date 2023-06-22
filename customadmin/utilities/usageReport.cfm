@@ -33,8 +33,16 @@ Cloudinary Usage Report
 	<tr>
 		<td style="text-transform: capitalize;font-weight: bold;">#check#</td>
 		<td style="text-align: right;">#NumberFormat(stResults[check]['usage'])#</td>
-		<td style="text-align: right;">#NumberFormat(stResults[check]['limit'])#</td>
-		<td style="text-align: right;">#stResults[check]['used_percent']#%</td>
+		<cfif structKeyExists(stResults[check], 'limit')>
+			<td style="text-align: right;">#NumberFormat(stResults[check]['limit'])#</td>
+		<cfelse>
+			<td>N/A</td>
+		</cfif>
+		<cfif structKeyExists(stResults[check], 'used_percent')>
+			<td style="text-align: right;">#stResults[check]['used_percent']#%</td>
+		<cfelse>
+			<td>N/A</td>
+		</cfif>
 	</tr>
 </cfloop>
 </tbody>
