@@ -510,7 +510,7 @@
 				<cfset fileURL = "https:" & fileURL>
 			</cfif>
 
-			<cfset fileURL = fetchURL & fileURL>
+			<cfset fileURL = fetchURL & urlEncodedFormat(fileURL)>
 		</cfif>
 
 		<cfreturn fileURL />
