@@ -501,7 +501,7 @@
 					<cfset fileURL = "https:" & fileURL>
 				</cfif>
 
-				<cfset fileURL = "#endpoint#/#method#/q_auto/#fileURL#">
+				<cfset fileURL = "#endpoint#/#method#/q_auto/#urlEncodedFormat(fileURL)#">
 			<cfelse>
 				<!--- Don't modify file --->
 			</cfif>
