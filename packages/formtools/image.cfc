@@ -423,6 +423,51 @@
 	</cffunction>
 	
 	
+	<cffunction name="fixImage" access="public" output="false" returntype="struct" hint="Fixes an image's size. For Cloudinary-hosted sources this skips the core getImageInfo() call, which downloads and decodes the full-resolution image purely to measure it - unnecessary here because GenerateImage just builds a Cloudinary transform URL that performs any resize/crop.">
+		<cfargument name="filename" type="string" required="true" hint="The image" />
+		<cfargument name="stMetadata" type="struct" required="true" hint="Property metadata" />
+		<cfargument name="resizeMethod" type="string" required="true" default="#arguments.stMetadata.ftAutoGenerateType#" hint="The resizing method to use to fix the size." />
+		<cfargument name="quality" type="string" required="true" default="#arguments.stMetadata.ftQuality#" hint="Quality setting to use for resizing" />
+		<cfargument name="bForceCrop" type="boolean" required="false" default="false" hint="Used to force the custom cropping" />
+
+		<cfset var stGeneratedImageArgs = structnew() />
+		<cfset var stGeneratedImage = structnew() />
+
+		<!--- Only Cloudinary-hosted sources can skip dimension measurement (the transform URL performs
+		      the resize). For local files - uploadVia != post, or before the source reaches Cloudinary -
+		      defer to the core implementation, which measures and resizes the file on disk. --->
+		<cfif not (len(arguments.filename) and application.fapi.getConfig("cloudinary", "uploadVia", "post") eq "post" and refindnocase("//res.cloudinary.com/",arguments.filename))>
+			<cfreturn super.fixImage(argumentCollection=arguments) />
+		</cfif>
+
+		<cfparam name="arguments.stMetadata.ftCustomEffectsObjName" default="imageEffects" />
+		<cfparam name="arguments.stMetadata.ftLCustomEffects" default="" />
+		<cfparam name="arguments.stMetadata.ftConvertImageToFormat" default="" />
+		<cfparam name="arguments.stMetadata.ftbSetAntialiasing" default="true" />
+		<cfparam name="arguments.stMetadata.ftInterpolation" default="blackman" />
+		<cfparam name="arguments.stMetadata.ftQuality" default="#arguments.quality#" />
+		<cfparam name="arguments.stMetadata.ftPadColor" default="##ffffff" />
+		<cfif not len(arguments.resizeMethod)><cfset arguments.resizeMethod = arguments.stMetadata.ftAutoGenerateType /></cfif>
+
+		<cfset stGeneratedImageArgs.Source = arguments.filename />
+		<cfset stGeneratedImageArgs.Destination = arguments.filename />
+		<cfset stGeneratedImageArgs.width = isNumeric(arguments.stMetadata.ftImageWidth) ? arguments.stMetadata.ftImageWidth : 0 />
+		<cfset stGeneratedImageArgs.height = isNumeric(arguments.stMetadata.ftImageHeight) ? arguments.stMetadata.ftImageHeight : 0 />
+		<cfset stGeneratedImageArgs.customEffectsObjName = arguments.stMetadata.ftCustomEffectsObjName />
+		<cfset stGeneratedImageArgs.lCustomEffects = arguments.stMetadata.ftLCustomEffects />
+		<cfset stGeneratedImageArgs.convertImageToFormat = arguments.stMetadata.ftConvertImageToFormat />
+		<cfset stGeneratedImageArgs.bSetAntialiasing = isValid("boolean", arguments.stMetadata.ftbSetAntialiasing) ? arguments.stMetadata.ftbSetAntialiasing : true />
+		<cfset stGeneratedImageArgs.interpolation = arguments.stMetadata.ftInterpolation />
+		<cfset stGeneratedImageArgs.quality = arguments.stMetadata.ftQuality />
+		<cfset stGeneratedImageArgs.bUploadOnly = false />
+		<cfset stGeneratedImageArgs.PadColor = arguments.stMetadata.ftPadColor />
+		<cfset stGeneratedImageArgs.ResizeMethod = arguments.resizeMethod />
+
+		<cfset stGeneratedImage = GenerateImage(argumentCollection=stGeneratedImageArgs) />
+
+		<cfreturn passed(stGeneratedImage.filename) />
+	</cffunction>
+
 	<cffunction name="uploadToCloudinary" access="public" output="false" returntype="any" hint="Uploads specified image to Cloudinary and returns Cloudinary image path">
 		<cfargument name="file" type="string" required="true" />
 		<cfargument name="publicID" type="string" required="false" default="#listfirst(listlast(arguments.file,'/'),'.')#_#application.fapi.getUUID()#" />
