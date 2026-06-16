@@ -434,9 +434,11 @@
 		<cfset var stGeneratedImage = structnew() />
 
 		<!--- Only Cloudinary-hosted sources can skip dimension measurement (the transform URL performs
-		      the resize). For local files - uploadVia != post, or before the source reaches Cloudinary -
-		      defer to the core implementation, which measures and resizes the file on disk. --->
-		<cfif not (len(arguments.filename) and application.fapi.getConfig("cloudinary", "uploadVia", "post") eq "post" and refindnocase("//res.cloudinary.com/",arguments.filename))>
+		      the resize). This applies to any upload mode - post, fetch and auto all store a
+		      //res.cloudinary.com/ URL that GenerateImage()/transform() can build cuts from without
+		      downloading the original. Non-Cloudinary values (a still-local source) defer to the core
+		      implementation, which measures and resizes the file on disk. --->
+		<cfif not (len(arguments.filename) and refindnocase("//res.cloudinary.com/", arguments.filename))>
 			<cfreturn super.fixImage(argumentCollection=arguments) />
 		</cfif>
 
