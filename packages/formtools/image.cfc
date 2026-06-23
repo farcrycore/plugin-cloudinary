@@ -705,7 +705,7 @@
 				<cfreturn "" />
 			</cfif>
 			
-			<cfreturn application.fc.lib.cdn.ioCopyFile(source_location="images",source_file=currentfilename,dest_location="images",dest_file=newfilename,nameconflict="makeunique",uniqueamong="images") />
+			<cfreturn application.fc.lib.cdn.ioCopyFile(source_location="images",source_file=currentfilename,dest_location="images",dest_file=currentfilename,nameconflict="makeunique",uniqueamong="images") />
 		
 		</cfif>
 	</cffunction>
